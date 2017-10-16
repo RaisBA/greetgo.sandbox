@@ -13,7 +13,12 @@ import {AuthInfo} from "../model/AuthInfo";
     <main-form-component
       *ngIf="mode == 'main-form'"
       (exit)="exit()"
+      (list)="list()"
     ></main-form-component>
+    
+    <client-list-component
+        *ngIf="mode == 'client-list'"
+    ></client-list-component>
 
     <div *ngIf="mode == 'init'">
       Инициация системы... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
@@ -46,6 +51,10 @@ export class RootComponent implements OnInit {
       this.mode = "login";
     });
 
+  }
+
+  list(){
+    this.mode = 'client-list';
   }
 
   exit() {

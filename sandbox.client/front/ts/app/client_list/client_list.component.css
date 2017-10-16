@@ -1,0 +1,13 @@
+
+
+table{
+    font-family: Arial, serif;
+    border-collapse: collapse;
+    width: 80%;
+}
+th{
+    border-bottom: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+}
+T

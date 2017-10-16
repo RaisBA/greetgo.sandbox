@@ -8,8 +8,14 @@ import {HttpService} from "../HttpService";
     <div>
       <h2>Main Form Component</h2>
 
-      <button (click)="exit.emit()">Выход</button>
-
+      <div>
+        <button (click)="exit.emit()">Выход</button>
+      </div>
+      
+      <div>
+        <button (click)="list.emit()">Просмотреть таблицу клиентов</button>
+      </div>
+      
       <div *ngIf="!userInfo">
         <button [disabled]="!loadUserInfoButtonEnabled" (click)="loadUserInfoButtonClicked()">
           Загрузить данные пользователя
@@ -57,6 +63,8 @@ import {HttpService} from "../HttpService";
 })
 export class MainFormComponent {
   @Output() exit = new EventEmitter<void>();
+
+  @Output() list = new EventEmitter<void>();
 
   userInfo: UserInfo | null = null;
   loadUserInfoButtonEnabled: boolean = true;
