@@ -1,66 +1,158 @@
-import {Component, EventEmitter, Output} from "@angular/core";
-import {UserInfo} from "../../model/UserInfo";
+import {Component, EventEmitter, Output, ViewChild} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {ClientInfo} from "../../model/ClientInfo";
-import {error} from "util";
-
+import {ClientEditWindowComponent} from "../client_edit_window/client_edit_window.component";
 @Component({
-  selector: 'client-list-component',
-  styles: [require('./client_list.component.css')],
-  template: `
+    selector: 'client-list-component',
+    styles: [require('./client_list.component.css')],
+    template: `
     <div>
         <div>
             &nbsp;
         </div>
         <div align="center">
         <table>
-            <tr>
-                <th>ФИО</th>
-                <th>Характер</th>
-                <th>Возраст</th>
-                <th>Общий остаток счета</th>
-                <th>Максимальный счет</th>
-                <th>Минимальный счет</th>
+            <tr class="tbl-head">
+                <th><label>ФИО</label></th>
+                <th><label>Характер</label></th>
+                <th (click)="changeSort('AGE')">
+                    <div name="ageSort">Возраст
+                        <label *ngIf="ageSortFlag == 1">&#8595;</label>
+                        <label *ngIf="ageSortFlag == -1">&#8593;</label>
+                        <label *ngIf="ageSortFlag == 0">&nbsp;&#183;</label>
+                    </div>
+                </th>
+                <th (click)="changeSort('TOTAL_SCORE')">Общий остаток счета
+                    <label *ngIf="totalScoreSortFlag == 1">&#8595;</label>
+                    <label *ngIf="totalScoreSortFlag == -1">&#8593;</label>
+                    <label *ngIf="totalScoreSortFlag == 0">&nbsp;&#183;</label>
+                </th>
+                <th (click)="changeSort('MAX_SCORE')">Максимальный счет
+                    <label *ngIf="maxScoreSortFlag == 1">&#8595;</label>
+                    <label *ngIf="maxScoreSortFlag == -1">&#8593;</label>
+                    <label *ngIf="maxScoreSortFlag == 0">&nbsp;&#183;</label>
+                </th>
+                <th (click)="changeSort('MIN_SCORE')">Минимальный счет
+                    <label *ngIf="minScoreSortFlag == 1">&#8595;</label>  
+                    <label *ngIf="minScoreSortFlag == -1">&#8593;</label>
+                    <label *ngIf="minScoreSortFlag == 0">&nbsp;&#183;</label>
+                </th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th class="button-th">
+                    <label (click)="addNewClient()">| + |</label>
+                </th>
             </tr>
-            <tr *ngFor="let client of clients">
-                <td>{{client.fullName}}</td>
-                <td>{{client.charm}}</td>
-                <td>{{client.age}}</td>
-                <td>{{client.totalScore}}</td>
-                <td>{{client.maxScore}</td>
-                <td>{{client.minScore}</td>
+            <tr class="client-row" *ngFor="let client of clients">
+                <td class="string-td">{{client.fullName}}</td>
+                <td class="string-td">{{client.charm}}</td>
+                <td class="number-td">{{client.age}}</td>
+                <td class="number-td">{{client.totalScore}}</td>
+                <td class="number-td">{{client.maxScore}}</td>
+                <td class="number-td">{{client.minScore}}</td>
+                <td></td>
+                <td class="button-td">
+                    <label (click)="editClient(client.id)">|...|</label>
+                </td>
+                <td class="button-td">
+                    <label (click)="deleteClient(client.id)">| - |</label>
+                </td>
             </tr>
+        <client-edit-window #clientEditWindowComponent></client-edit-window>
         </table>
         </div>
     <div>
     `,
 })
 export class ClientListComponent {
-  @Output() exit = new EventEmitter<void>();
+    @Output() exit = new EventEmitter<void>();
 
-  clients: Array<ClientInfo> | null = [];
-  canEdit: boolean = true;
-  loadUserInfoError: string | null;
+    clients: Array<ClientInfo> | null = [];
+    canEdit: boolean = true;
+    loadUserInfoError: string | null;
+    ageSortFlag: number = 0;
+    totalScoreSortFlag: number = 0;
+    maxScoreSortFlag: number = 0;
+    minScoreSortFlag: number = 0;
 
-  constructor(private httpService: HttpService) {}
+    @ViewChild('clientEditWindowComponent') clientEditWindowComponent: ClientEditWindowComponent;
 
-  ngOnInit() : void{
-    this.httpService.get("/client/list").toPromise().then(res => {
-        let c1 = new ClientInfo();
-        c1.fullName = "Иванов Иван Иванович";
-        c1.age = 12;
-        c1.charm = "Спокойный";
-        c1.totalScore = 12000;
-        c1.maxScore = 11000;
-        c1.minScore = 100;
-        this.clients.push(c1);
-        console.log(c1);
-      },
-        error => {
-      console.log(error);
-      }
-    );
-  }
+    constructor(private httpService: HttpService) {
+    }
 
+    ngOnInit(): void {
+        this.httpService.get("/client/list").toPromise().then(res => {
+                this.clients = res.json();
+            },
+            error => {
+                console.log(error);
+            }
+        );
+    }
 
+    changeSort(type: string) {
+        switch (type) {
+            case "AGE":
+                this.totalScoreSortFlag = 0;
+                this.maxScoreSortFlag = 0;
+                this.minScoreSortFlag = 0;
+                if (this.ageSortFlag == 0) {
+                    this.ageSortFlag = 1;
+                }
+                else {
+                    this.ageSortFlag *= -1;
+                }
+                break;
+            case  "TOTAL_SCORE":
+                this.ageSortFlag = 0;
+                this.maxScoreSortFlag = 0;
+                this.minScoreSortFlag = 0;
+                if (this.totalScoreSortFlag == 0) {
+                    this.totalScoreSortFlag = 1;
+                }
+                else {
+                    this.totalScoreSortFlag *= -1;
+                }
+                break;
+            case "MAX_SCORE":
+                this.ageSortFlag = 0;
+                this.totalScoreSortFlag = 0;
+                this.minScoreSortFlag = 0;
+                if (this.maxScoreSortFlag == 0) {
+                    this.maxScoreSortFlag = 1;
+                }
+                else {
+                    this.maxScoreSortFlag *= -1;
+                }
+                break;
+            case "MIN_SCORE":
+                this.ageSortFlag = 0;
+                this.totalScoreSortFlag = 0;
+                this.maxScoreSortFlag = 0;
+                if (this.minScoreSortFlag == 0) {
+                    this.minScoreSortFlag = 1;
+                }
+                else {
+                    this.minScoreSortFlag *= -1;
+                }
+                break;
+        }
+    }// end changeSort
+
+    editClient(id){
+        this.clientEditWindowComponent.isNew = false;
+        this.clientEditWindowComponent.showWindow = true;
+        console.log("edit " + id);
+    }
+
+    deleteClient(id){
+        console.log("delete " + id);
+    }
+
+    addNewClient(){
+        this.clientEditWindowComponent.isNew = true;
+        this.clientEditWindowComponent.showWindow = true;
+        console.log("add new client");
+    }
 }

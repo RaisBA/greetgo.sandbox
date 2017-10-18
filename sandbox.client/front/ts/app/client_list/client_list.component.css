@@ -5,9 +5,63 @@ table{
     border-collapse: collapse;
     width: 80%;
 }
+
+tbody .client-row:hover{
+    background-color: #FEFBF7;
+}
+
+
 th{
     border-bottom: 1px solid #dddddd;
     text-align: center;
+    font-size: medium;
+    padding: 8px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+th label{
+    padding-left: 2px;
+    font-size: medium;
+}
+
+td{
+    border-bottom: 1px solid #dddddd;
     padding: 8px;
 }
-T
+
+.string-td{
+    text-align: left;
+}
+.number-td{
+    text-align: right;
+}
+
+.button-th{
+    color: grey;
+}
+.button-th:hover{
+    color: black;
+}
+
+td label{
+    color: grey;
+    width: 80%;
+    height: 80%;
+    text-align: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+td label:hover{
+    color: black;
+}

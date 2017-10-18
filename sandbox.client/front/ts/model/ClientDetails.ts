@@ -1,6 +1,6 @@
 import {AddressInfo} from "./AddressInfo";
 import {PhoneInfo} from "./PhoneInfo";
-export class ClientInfo {
+export class ClientDetails {
     public id : string;
     public name : string;
     public surname : string;
@@ -13,7 +13,7 @@ export class ClientInfo {
     public phones : Array<PhoneInfo>;
 
 
-    public assign(o: ClientInfo): ClientInfo {
+    public assign(o: ClientDetails): ClientDetails {
         this.id = o.id;
         this.name = o.name;
         this.surname = o.surname;
