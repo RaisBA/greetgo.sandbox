@@ -7,7 +7,7 @@ export class ClientDetails {
     public patronymic : string;
     public gender : string;
     public charm : string;
-    public birthDate : Date;
+    public birthDate : string;
     public regAddress : AddressInfo;
     public factAddress : AddressInfo;
     public phones : Array<PhoneInfo>;

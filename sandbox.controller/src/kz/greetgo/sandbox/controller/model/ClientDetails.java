@@ -11,7 +11,7 @@ public class ClientDetails {
   public String patronymic;
   public String gender;
   public String charm;
-  public Date birthDate;
+  public String  birthDate;
   public AddressInfo regAddress;
   public AddressInfo factAddress;
   public List<PhoneInfo> phones;

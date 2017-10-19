@@ -1,7 +1,9 @@
-import {Component, EventEmitter, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, OnInit, Output, ViewChild} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {ClientInfo} from "../../model/ClientInfo";
 import {ClientEditWindowComponent} from "../client_edit_window/client_edit_window.component";
+import {ClientDetails} from "../../model/ClientDetails";
+import {error} from "util";
 @Component({
     selector: 'client-list-component',
     styles: [require('./client_list.component.css')],
@@ -65,7 +67,7 @@ import {ClientEditWindowComponent} from "../client_edit_window/client_edit_windo
     <div>
     `,
 })
-export class ClientListComponent {
+export class ClientListComponent  implements OnInit{
     @Output() exit = new EventEmitter<void>();
 
     clients: Array<ClientInfo> | null = [];
@@ -82,13 +84,7 @@ export class ClientListComponent {
     }
 
     ngOnInit(): void {
-        this.httpService.get("/client/list").toPromise().then(res => {
-                this.clients = res.json();
-            },
-            error => {
-                console.log(error);
-            }
-        );
+        this.getClientList();
     }
 
     changeSort(type: string) {
@@ -142,6 +138,10 @@ export class ClientListComponent {
 
     editClient(id){
         this.clientEditWindowComponent.isNew = false;
+        this.getClientDetails(id);
+        this.getGenders();
+        this.getCharms();
+        this.getPhoneTypes();
         this.clientEditWindowComponent.showWindow = true;
         console.log("edit " + id);
     }
@@ -152,7 +152,60 @@ export class ClientListComponent {
 
     addNewClient(){
         this.clientEditWindowComponent.isNew = true;
+        this.getGenders();
+        this.getCharms();
+        this.getPhoneTypes();
         this.clientEditWindowComponent.showWindow = true;
         console.log("add new client");
+    }
+
+    getClientList(){
+        this.httpService.get("/client/list").toPromise().then(res => {
+                this.clients = res.json();
+            },
+            error => {
+                console.log(error);
+            }
+        );
+    }
+
+    getClientDetails(id){
+        this.httpService.get("/client/details", {clientId:id}).toPromise().then(res => {
+                this.clientEditWindowComponent.client = new ClientDetails().assign(res.json() as ClientDetails);
+            }, error => {
+                console.log("/client/details" + error);
+            }
+
+        );
+    }
+
+
+
+    getGenders(){
+        this.httpService.get("/client/genders").toPromise().then(res => {
+                this.clientEditWindowComponent.genders = res.json();
+            }, error => {
+                console.log("/client/genders" + error);
+            }
+
+        );
+    }
+    getCharms(){
+        this.httpService.get("/client/charms").toPromise().then(res => {
+                this.clientEditWindowComponent.charms = res.json();
+            }, error => {
+                console.log("/client/charms" + error);
+            }
+
+        );
+    }
+    getPhoneTypes(){
+        this.httpService.get("/client/phoneTypes").toPromise().then(res => {
+                this.clientEditWindowComponent.phoneTypes = res.json();
+            }, error => {
+                console.log("/client/phoneTypes" + error);
+            }
+
+        );
     }
 }
