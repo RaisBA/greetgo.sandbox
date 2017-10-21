@@ -107,3 +107,23 @@
     border-right: 2px solid #dddddd;
     align-content: center;
 }
+
+.save-lb{
+    color: grey;
+    font-size: large;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.save-lb:hover{
+    color: black;
+}
+
+.bottom{
+    padding-top: 20px;
+    padding-left: 40%;
+}

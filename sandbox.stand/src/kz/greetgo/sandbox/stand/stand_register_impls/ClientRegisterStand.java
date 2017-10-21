@@ -23,6 +23,9 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterStand implements ClientRegister {
+
+  private static int phoneId = 124512;
+
   @Override
   public List<ClientInfo> getClientList() {
     List<ClientInfo> list = new LinkedList<>();
@@ -71,8 +74,8 @@ public class ClientRegisterStand implements ClientRegister {
     factAddress.house = "61";
     factAddress.street = "Пушкина";
     List<PhoneInfo> phones = new LinkedList<>();
-    phones.add(new PhoneInfo("+ 7 777 161 13 23 ", "MOBILE"));
-    phones.add(new PhoneInfo("+ 7 2424 461 61 27 ", "HOME"));
+    phones.add(new PhoneInfo("1", "+ 7 777 161 13 23 ", "MOBILE"));
+    phones.add(new PhoneInfo("2", "+ 7 2424 461 61 27 ", "HOME"));
 
     res.factAddress = factAddress;
     res.regAddress = regAddress;
@@ -110,5 +113,10 @@ public class ClientRegisterStand implements ClientRegister {
     list.add(new Directory("HOME", "Домашний"));
 
     return list;
+  }
+
+  @Override
+  public PhoneInfo getNewPhone(String num, String type) {
+    return new PhoneInfo("" + ++phoneId, num, type);
   }
 }

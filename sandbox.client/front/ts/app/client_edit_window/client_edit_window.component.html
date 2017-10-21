@@ -7,102 +7,135 @@
                     <label *ngIf="isNew">Добавление</label>
                     <label *ngIf="!isNew">Редактирование</label>
                 </div>
-                <div class="client-row">
-                    <input type="text" tabindex="2" class="client-info"
-                           placeholder="Фамилия" required
-                           ngModel="{{client ? client.surname : ''}}">
-                    <input type="text" tabindex="3" class="client-info"
-                           placeholder="Имя" required
-                           ngModel="{{client ? client.name : ''}}">
-                    <input type="text" tabindex="4" class="client-info"
-                           placeholder="Отчество" required
-                           ngModel="{{client ? client.patronymic : ''}}">
-                </div>
-                <div class="client-row">
-                    <input type="date" class="client-info" required
-                        placeholder="Дата рождения"
-                        ngModel="{{client ? client.birthDate : ''}}">
-                    <select *ngIf="charms" required title="Характер" class="client-info">
-                        <option *ngFor="let charm of charms" value="{{charm.code}}"
-                                [selected]="charm.code == client.charm">
-                            {{charm.name}}
-                        </option>
-                    </select>
-                    <select *ngIf="genders" required title="Пол" class="client-info">
-                        <option *ngFor="let gender of genders" value="{{gender.code}}"
-                                [selected]="gender.code == client.gender">
-                            {{gender.name}}
-                        </option>
-                    </select>
-                </div>
+                <form #clientFormId="ngForm">
+                    <div class="client-row">
+                        <input name="surname" type="text" tabindex="2" class="client-info"
+                               placeholder="Фамилия" required
+                               ngModel="{{client ? client.surname : ''}}">
+                        <input name="name" type="text" tabindex="3" class="client-info"
+                               placeholder="Имя" required
+                               ngModel="{{client ? client.name : ''}}">
+                        <input name="patronymic" type="text" tabindex="4" class="client-info"
+                               placeholder="Отчество" required
+                               ngModel="{{client ? client.patronymic : ''}}">
+                    </div>
+                    <div class="client-row">
+                        <input name="birthday" type="date" class="client-info" required
+                               placeholder="Дата рождения"
+                               ngModel="{{client ? client.birthDate : ''}}">
+                        <select name="charm" *ngIf="charms" required title="Характер" class="client-info">
+                            <option *ngFor="let charm of charms" value="{{charm.code}}"
+                                    [selected]="charm.code == client.charm">
+                                {{charm.name}}
+                            </option>
+                        </select>
+                        <select name="gender" *ngIf="genders" required title="Пол" class="client-info">
+                            <option *ngFor="let gender of genders" value="{{gender.code}}"
+                                    [selected]="gender.code == client.gender">
+                                {{gender.name}}
+                            </option>
+                        </select>
+                    </div>
+                </form>
                 <div style="padding-top: 12px">
-                    <table class="addresses">
-                        <tr>
-                            <th>
-                                <label class="address-title">Фактический адресс</label>
-                            </th>
-                            <th>
-                                <label class="address-title">Регистрационный адресс</label>
-                            </th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div>
-                                    <input type="text" placeholder="Улица" class="address-info"
-                                      ngModel="{{client ?(client.factAddress ? client.factAddress.street : '') : '' }}">
-                                </div>
-                                <div>
-                                    <input type="text" placeholder="Дом" class="address-info"
-                                      ngModel="{{client ?(client.factAddress ? client.factAddress.house : '') : '' }}">
-                                </div>
-                                <div>
-                                    <input type="text" placeholder="Квартира" class="address-info"
-                                      ngModel="{{client ?(client.factAddress ? client.factAddress.flat : '') : '' }}">
-                                </div>
-                            </td>
-                            <td>
-                                <div>
-                                    <input type="text" placeholder="Улица" class="address-info"
-                                      ngModel="{{client ?(client.regAddress ? client.regAddress.street : '') : '' }}">
-                                </div>
-                                <div>
-                                    <input type="text" placeholder="Дом" class="address-info"
-                                      ngModel="{{client ?(client.regAddress ? client.regAddress.house : '') : '' }}">
-                                </div>
-                                <div>
-                                    <input type="text" placeholder="Квартира" class="address-info"
-                                      ngModel="{{client ?(client.regAddress ? client.regAddress.flat : '') : '' }}">
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
+                    <form #addressesFormId="ngForm">
+                        <table class="addresses">
+                            <tr>
+                                <th>
+                                    <label class="address-title">Фактический адресс</label>
+                                </th>
+                                <th>
+                                    <label class="address-title">Регистрационный адресс</label>
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>
+                                        <input name="factStreet" type="text"
+                                               placeholder="Улица" class="address-info"
+                                               ngModel="{{client ?(client.factAddress ? client.factAddress.street : '') : '' }}">
+                                    </div>
+                                    <div>
+                                        <input name="factHouse" type="text" placeholder="Дом" class="address-info"
+                                               ngModel="{{client ?(client.factAddress ? client.factAddress.house : '') : '' }}">
+                                    </div>
+                                    <div>
+                                        <input name="factFlat" type="text"
+                                               placeholder="Квартира" class="address-info"
+                                               ngModel="{{client ?(client.factAddress ? client.factAddress.flat : '') : '' }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <input name="regStreet" type="text" placeholder="Улица" class="address-info"
+                                               ngModel="{{client ?(client.regAddress ? client.regAddress.street : '') : '' }}">
+                                    </div>
+                                    <div>
+                                        <input name="regHouse" type="text" placeholder="Дом" class="address-info"
+                                               ngModel="{{client ?(client.regAddress ? client.regAddress.house : '') : '' }}">
+                                    </div>
+                                    <div>
+                                        <input name="regFlat" type="text" placeholder="Квартира" class="address-info"
+                                               ngModel="{{client ?(client.regAddress ? client.regAddress.flat : '') : '' }}">
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
                 </div>
                 <div style="padding-top: 12px">
                     <label>
                         Телефоны
                     </label>
-                    <label class="label-button">
-                        | + |
-                    </label>
-                    <table class="phones">
-                        <tr *ngFor="let phone of client.phones">
-                            <td class="phone-info-td">
-                                <input class="phone-info" type="tel" placeholder="Номер" required
-                                 ngModel="{{phone.num}}">
-                            </td>
-                            <td class="phone-info-td">
-                                <select *ngIf="phoneTypes" required title="Тип" class="phone-info">
-                                    <option *ngFor="let type of phoneTypes" value="{{type.code}}"
-                                            [selected]="type.code == phone.type">
-                                        {{type.name}}
-                                    </option>
-                                </select>
-                            </td>
-                            <td class="label-button">
-                                <label (click)="deletePhone(phone.id)">| - |</label>
-                            </td>
-                        </tr>
-                    </table>
+                    <form #phonesFormId="ngForm">
+                        <table class="phones">
+                            <tr *ngFor="let phone of client.phones">
+                                <td class="phone-info-td">
+                                    <input name="{{phone.id}}"
+                                           class="phone-info" type="tel" placeholder="Номер" required
+                                           ngModel="{{phone.num}}">
+                                </td>
+                                <td class="phone-info-td">
+                                    <select disabled
+                                            id="selectPhone{{phone.id}}" title="Тип" class="phone-info">
+                                        <option *ngFor="let type of phoneTypes" value="{{type.code}}"
+                                                [selected]="type.code == phone.type">
+                                            {{type.name}}
+                                        </option>
+                                    </select>
+                                </td>
+                                <td class="label-button">
+                                    <label (click)="deletePhone(phone)">| - |</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="phone-info-td">
+                                    <input #newPhoneNum
+                                           class="phone-info" type="text" placeholder="Номер" required>
+                                </td>
+                                <td class="phone-info-td">
+                                    <select #newPhoneType required
+                                            class="phone-info">
+                                        <option *ngFor="let type of phoneTypes" value="{{type.code}}">
+                                            {{type.name}}
+                                        </option>
+                                    </select>
+                                </td>
+                                <td class="label-button">
+                                    <label (click)="addNewPhone(newPhoneNum.value, newPhoneType.value)">
+                                        | + |
+                                    </label>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+                <div class="bottom">
+                    <label class="save-lb"
+                           (click)="saveEdit(clientFormId.value, addressesFormId.value, phonesFormId.value)"
+                           *ngIf="clientFormId.valid">| OK |</label>
+                    <label class="save-lb">&nbsp;&nbsp;</label>
+                    <label class="save-lb" (click)="closeEditWindow()">| ОТМЕНА |</label>
                 </div>
             </div>
         </div>

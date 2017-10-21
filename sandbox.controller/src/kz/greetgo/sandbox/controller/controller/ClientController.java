@@ -49,4 +49,10 @@ public class ClientController implements Controller {
   public List<Directory> getPhoneTypes(){
     return clientRegister.get().getPhoneTypes();
   }
+
+  @ToJson
+  @Mapping("/newPhone")
+  public PhoneInfo getNewPhone(@Par("num") String num, @Par("type") String type){
+    return clientRegister.get().getNewPhone(num, type);
+  }
 }

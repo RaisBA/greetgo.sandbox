@@ -4,6 +4,7 @@ import {ClientInfo} from "../../model/ClientInfo";
 import {ClientEditWindowComponent} from "../client_edit_window/client_edit_window.component";
 import {ClientDetails} from "../../model/ClientDetails";
 import {error} from "util";
+import {PhoneInfo} from "../../model/PhoneInfo";
 @Component({
     selector: 'client-list-component',
     styles: [require('./client_list.component.css')],
@@ -61,7 +62,10 @@ import {error} from "util";
                     <label (click)="deleteClient(client.id)">| - |</label>
                 </td>
             </tr>
-        <client-edit-window #clientEditWindowComponent></client-edit-window>
+        <client-edit-window #clientEditWindowComponent
+            (newPhone)="addNewPhone($event)"
+            (save)="saveClientEdit($event)"
+            ></client-edit-window>
         </table>
         </div>
     <div>
@@ -79,6 +83,7 @@ export class ClientListComponent  implements OnInit{
     minScoreSortFlag: number = 0;
 
     @ViewChild('clientEditWindowComponent') clientEditWindowComponent: ClientEditWindowComponent;
+
 
     constructor(private httpService: HttpService) {
     }
@@ -155,6 +160,7 @@ export class ClientListComponent  implements OnInit{
         this.getGenders();
         this.getCharms();
         this.getPhoneTypes();
+        this.clientEditWindowComponent.client = new ClientDetails();
         this.clientEditWindowComponent.showWindow = true;
         console.log("add new client");
     }
@@ -207,5 +213,22 @@ export class ClientListComponent  implements OnInit{
             }
 
         );
+    }
+
+    addNewPhone(event){
+        this.httpService.get("/client/newPhone", event).toPromise().then(res =>{
+            if (!this.clientEditWindowComponent.client.phones){
+                this.clientEditWindowComponent.client.phones = [];
+            }
+
+            this.clientEditWindowComponent.client.phones.push(new PhoneInfo().assign(res.json()));
+            console.log(res.json());
+        }, error => {
+            console.log("ERROR ADD NEW PHONE" + error);
+        });
+    }
+
+    saveClientEdit(event){
+
     }
 }
