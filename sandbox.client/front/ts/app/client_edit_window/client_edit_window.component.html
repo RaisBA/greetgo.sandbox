@@ -96,7 +96,7 @@
                                            ngModel="{{phone.num}}">
                                 </td>
                                 <td class="phone-info-td">
-                                    <select disabled
+                                    <select
                                             id="selectPhone{{phone.id}}" title="Тип" class="phone-info">
                                         <option *ngFor="let type of phoneTypes" value="{{type.code}}"
                                                 [selected]="type.code == phone.type">
@@ -109,11 +109,11 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="phone-info-td">
+                                <td class="phone-new-td">
                                     <input #newPhoneNum
                                            class="phone-info" type="text" placeholder="Номер" required>
                                 </td>
-                                <td class="phone-info-td">
+                                <td class="phone-new-td">
                                     <select #newPhoneType required
                                             class="phone-info">
                                         <option *ngFor="let type of phoneTypes" value="{{type.code}}">
@@ -121,7 +121,7 @@
                                         </option>
                                     </select>
                                 </td>
-                                <td class="label-button">
+                                <td class="label-button-new">
                                     <label (click)="addNewPhone(newPhoneNum.value, newPhoneType.value)">
                                         | + |
                                     </label>

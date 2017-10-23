@@ -19,5 +19,11 @@ public interface ClientRegister {
 
   List<Directory> getPhoneTypes();
 
-  PhoneInfo getNewPhone(String num, String type);
+  PhoneInfo getNewPhone(String clientId, String num, String type);
+
+  List<PhoneInfo> deletePhone(String clientId, String id, String num);
+
+  void deleteClient(String id);
+
+  void saveClient(ClientDetails clientDetails);
 }

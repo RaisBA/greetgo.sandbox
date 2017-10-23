@@ -2,6 +2,7 @@ import {Component, EventEmitter, Output} from "@angular/core";
 import {ClientDetails} from "../../model/ClientDetails";
 import {Directory} from "../../model/Directory";
 import {AddressInfo} from "../../model/AddressInfo";
+import {PhoneInfo} from "../../model/PhoneInfo";
 
 
 @Component({
@@ -11,6 +12,7 @@ import {AddressInfo} from "../../model/AddressInfo";
 })
 export class ClientEditWindowComponent{
     showWindow: boolean = false;
+    canEdit: boolean = false;
     isNew: boolean = true;
     client: ClientDetails = new ClientDetails();
 
@@ -28,47 +30,43 @@ export class ClientEditWindowComponent{
     }
 
     saveEdit(clientInfo, addresses, phoneList){
-        this.client.name = clientInfo["name"];
-        this.client.surname = clientInfo["surname"];
-        this.client.patronymic = clientInfo["patronymic"];
-        this.client.gender = clientInfo["gender"];
-        this.client.charm = clientInfo["charm"];
+        let result = new ClientDetails();
+        result.id = this.client.id;
+        result.name = clientInfo["name"];
+        result.surname = clientInfo["surname"];
+        result.patronymic = clientInfo["patronymic"];
+        result.charm = (<HTMLInputElement>document.getElementsByName("charm")[0]).value;
+        result.gender = (<HTMLInputElement>document.getElementsByName("gender")[0]).value;
 
-        if (!this.client.regAddress){
-            this.client.regAddress = new AddressInfo();
-        }
-        this.client.regAddress.street = addresses["regStreet"];
-        this.client.regAddress.house  = addresses["regHouse"];
-        this.client.regAddress.flat = addresses["regFlat"];
 
-        if (!this.client.factAddress){
-            this.client.factAddress = new AddressInfo();
-        }
-        this.client.factAddress.street = addresses["factStreet"];
-        this.client.factAddress.house = addresses["factHouse"];
-        this.client.factAddress.flat = addresses["factFlat"];
+        result.regAddress = new AddressInfo();
+        result.regAddress.street = addresses["regStreet"];
+        result.regAddress.house  = addresses["regHouse"];
+        result.regAddress.flat = addresses["regFlat"];
 
-        if (!this.client.phones){
-            this.client.phones = [];
-        }
+        result.factAddress = new AddressInfo();
+        result.factAddress.street = addresses["factStreet"];
+        result.factAddress.house = addresses["factHouse"];
+        result.factAddress.flat = addresses["factFlat"];
+
+        result.phones = [];
+
         for (let phoneId of Object.keys(phoneList)){
-            //TODO
+            let phone = new PhoneInfo();
+            phone.id = phoneId;
+            phone.num = phoneList[phoneId];
+            phone.type = (<HTMLInputElement>document.getElementById("selectPhone" + phoneId)).value;
+            result.phones.push(phone);
         }
 
-    }
+        this.save.emit(result);
+    }// end saveEdit
 
     addNewPhone(num, type){
-        this.newPhone.emit({"num":num, "type":type});
+        this.newPhone.emit({"clientID":this.client.id, "num":num, "type":type});
     }
 
     deletePhone(phone){
-        console.log("delete phone" + phone["id"] + "    " + phone["num"] + "  " + phone["type"]);
-        if (!this.isNew){
-            this.deletePhoneOut.emit(phone);
-        }
-    }
-
-    ediPhone(phone){
-        console.log(phone);
+        this.deletePhoneOut.emit({id:phone["id"], num:phone["num"], clientId:this.client.id});
     }
 }

@@ -5,6 +5,7 @@ import {ClientEditWindowComponent} from "../client_edit_window/client_edit_windo
 import {ClientDetails} from "../../model/ClientDetails";
 import {error} from "util";
 import {PhoneInfo} from "../../model/PhoneInfo";
+import {SortType} from "../../model/SortInfo";
 @Component({
     selector: 'client-list-component',
     styles: [require('./client_list.component.css')],
@@ -20,25 +21,25 @@ import {PhoneInfo} from "../../model/PhoneInfo";
                 <th><label>Характер</label></th>
                 <th (click)="changeSort('AGE')">
                     <div name="ageSort">Возраст
-                        <label *ngIf="ageSortFlag == 1">&#8595;</label>
-                        <label *ngIf="ageSortFlag == -1">&#8593;</label>
-                        <label *ngIf="ageSortFlag == 0">&nbsp;&#183;</label>
+                        <label *ngIf="sortFlag == 1 && sortT == 0">&#8595;</label>
+                        <label *ngIf="sortFlag == -1 && sortT == 0">&#8593;</label>
+                        <label *ngIf="sortT != 0">&nbsp;&#183;</label>
                     </div>
                 </th>
                 <th (click)="changeSort('TOTAL_SCORE')">Общий остаток счета
-                    <label *ngIf="totalScoreSortFlag == 1">&#8595;</label>
-                    <label *ngIf="totalScoreSortFlag == -1">&#8593;</label>
-                    <label *ngIf="totalScoreSortFlag == 0">&nbsp;&#183;</label>
+                    <label *ngIf="sortFlag == 1 && sortT == 1">&#8595;</label>
+                    <label *ngIf="sortFlag == -1 && sortT == 1">&#8593;</label>
+                    <label *ngIf="sortT != 1">&nbsp;&#183;</label>
                 </th>
                 <th (click)="changeSort('MAX_SCORE')">Максимальный счет
-                    <label *ngIf="maxScoreSortFlag == 1">&#8595;</label>
-                    <label *ngIf="maxScoreSortFlag == -1">&#8593;</label>
-                    <label *ngIf="maxScoreSortFlag == 0">&nbsp;&#183;</label>
+                    <label *ngIf="sortFlag == 1 && sortT == 2">&#8595;</label>
+                    <label *ngIf="sortFlag == -1 && sortT == 2">&#8593;</label>
+                    <label *ngIf="sortT != 2">&nbsp;&#183;</label>
                 </th>
                 <th (click)="changeSort('MIN_SCORE')">Минимальный счет
-                    <label *ngIf="minScoreSortFlag == 1">&#8595;</label>  
-                    <label *ngIf="minScoreSortFlag == -1">&#8593;</label>
-                    <label *ngIf="minScoreSortFlag == 0">&nbsp;&#183;</label>
+                    <label *ngIf="sortFlag == 1 && sortT == 3">&#8595;</label>  
+                    <label *ngIf="sortFlag == -1 && sortT == 3">&#8593;</label>
+                    <label *ngIf="sortT != 3">&nbsp;&#183;</label>
                 </th>
                 <th>&nbsp;</th>
                 <th>&nbsp;</th>
@@ -64,6 +65,7 @@ import {PhoneInfo} from "../../model/PhoneInfo";
             </tr>
         <client-edit-window #clientEditWindowComponent
             (newPhone)="addNewPhone($event)"
+            (deletePhoneOut)="deletePhone($event)"
             (save)="saveClientEdit($event)"
             ></client-edit-window>
         </table>
@@ -75,12 +77,10 @@ export class ClientListComponent  implements OnInit{
     @Output() exit = new EventEmitter<void>();
 
     clients: Array<ClientInfo> | null = [];
+    sortT: SortType = SortType.NON;
     canEdit: boolean = true;
     loadUserInfoError: string | null;
-    ageSortFlag: number = 0;
-    totalScoreSortFlag: number = 0;
-    maxScoreSortFlag: number = 0;
-    minScoreSortFlag: number = 0;
+    sortFlag: number = 0;
 
     @ViewChild('clientEditWindowComponent') clientEditWindowComponent: ClientEditWindowComponent;
 
@@ -93,49 +93,40 @@ export class ClientListComponent  implements OnInit{
     }
 
     changeSort(type: string) {
+        if (!this.sortFlag){
+            this.sortFlag = 1;
+        }
         switch (type) {
             case "AGE":
-                this.totalScoreSortFlag = 0;
-                this.maxScoreSortFlag = 0;
-                this.minScoreSortFlag = 0;
-                if (this.ageSortFlag == 0) {
-                    this.ageSortFlag = 1;
-                }
-                else {
-                    this.ageSortFlag *= -1;
+                if (this.sortT != SortType.AGE){
+                    this.sortT = SortType.AGE;
+                    this.sortFlag = 1;
+                } else {
+                    this.sortFlag *= -1;
                 }
                 break;
             case  "TOTAL_SCORE":
-                this.ageSortFlag = 0;
-                this.maxScoreSortFlag = 0;
-                this.minScoreSortFlag = 0;
-                if (this.totalScoreSortFlag == 0) {
-                    this.totalScoreSortFlag = 1;
-                }
-                else {
-                    this.totalScoreSortFlag *= -1;
+                if (this.sortT != SortType.TOTAL_SCORE){
+                    this.sortT = SortType.TOTAL_SCORE;
+                    this.sortFlag = 1;
+                } else {
+                    this.sortFlag *= -1;
                 }
                 break;
             case "MAX_SCORE":
-                this.ageSortFlag = 0;
-                this.totalScoreSortFlag = 0;
-                this.minScoreSortFlag = 0;
-                if (this.maxScoreSortFlag == 0) {
-                    this.maxScoreSortFlag = 1;
-                }
-                else {
-                    this.maxScoreSortFlag *= -1;
+                if (this.sortT != SortType.MAX_SCORE){
+                    this.sortT = SortType.MAX_SCORE;
+                    this.sortFlag = 1;
+                } else {
+                    this.sortFlag *= -1;
                 }
                 break;
             case "MIN_SCORE":
-                this.ageSortFlag = 0;
-                this.totalScoreSortFlag = 0;
-                this.maxScoreSortFlag = 0;
-                if (this.minScoreSortFlag == 0) {
-                    this.minScoreSortFlag = 1;
-                }
-                else {
-                    this.minScoreSortFlag *= -1;
+                if (this.sortT != SortType.MIN_SCORE){
+                    this.sortT = SortType.MIN_SCORE;
+                    this.sortFlag = 1;
+                } else {
+                    this.sortFlag *= -1;
                 }
                 break;
         }
@@ -152,7 +143,7 @@ export class ClientListComponent  implements OnInit{
     }
 
     deleteClient(id){
-        console.log("delete " + id);
+
     }
 
     addNewClient(){
@@ -229,6 +220,25 @@ export class ClientListComponent  implements OnInit{
     }
 
     saveClientEdit(event){
+        this.clientEditWindowComponent.canEdit = false;
+        console.log(event);
+        this.httpService.post("/client/save", {client:JSON.stringify(event)}).toPromise().then(res => {
+            this.clientEditWindowComponent.showWindow = false;
+            this.clientEditWindowComponent.client = new ClientDetails();
+            this.getClientList();
+        }, error => {
+            console.log(error);
+        });
+        this.clientEditWindowComponent.canEdit = true;
+    }
 
+    deletePhone(event){
+        this.clientEditWindowComponent.canEdit = false;
+        this.httpService.post("/client/deletePhone", event).toPromise().then(res => {
+            this.clientEditWindowComponent.client.phones = res.json();
+        }, error => {
+            console.log(error);
+        });
+        this.clientEditWindowComponent.canEdit = true;
     }
 }

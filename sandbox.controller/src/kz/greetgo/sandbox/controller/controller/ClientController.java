@@ -52,7 +52,19 @@ public class ClientController implements Controller {
 
   @ToJson
   @Mapping("/newPhone")
-  public PhoneInfo getNewPhone(@Par("num") String num, @Par("type") String type){
-    return clientRegister.get().getNewPhone(num, type);
+  public PhoneInfo getNewPhone(@Par("clientId") String clientId, @Par("num") String num, @Par("type") String type){
+    return clientRegister.get().getNewPhone(clientId, num, type);
+  }
+
+  @ToJson
+  @Mapping("/deletePhone")
+  public List<PhoneInfo> deletePhone(@Par("clientId") String clientId, @Par("id") String id, @Par("num") String num){
+    return clientRegister.get().deletePhone(clientId, id, num);
+  }
+
+  @ToJson
+  @Mapping("/save")
+  public void saveClient(@Par("client") @Json ClientDetails clientDetails){
+    clientRegister.get().saveClient(clientDetails);
   }
 }

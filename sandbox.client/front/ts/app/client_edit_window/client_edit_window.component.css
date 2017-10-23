@@ -82,7 +82,7 @@
     margin: 8px;
 }
 
-.label-button{
+.label-button, .label-button-new{
     color: grey;
     text-align: center;
     font-size: medium;
@@ -94,7 +94,11 @@
     -o-user-select: none;
     user-select: none;
 }
-.label-button:hover{
+.label-button-new{
+    background-color: #cccccc;
+    color: #607e89;
+}
+.label-button:hover, .label-button-new:hover{
     color: black;
 }
 .phones td{
@@ -102,6 +106,14 @@
 }
 
 .phone-info-td{
+    min-width: 300px;
+    padding-top: 2px;
+    border-right: 2px solid #dddddd;
+    align-content: center;
+}
+
+.phone-new-td{
+    background-color: #cccccc;
     min-width: 300px;
     padding-top: 2px;
     border-right: 2px solid #dddddd;
@@ -119,6 +131,7 @@
     -o-user-select: none;
     user-select: none;
 }
+
 .save-lb:hover{
     color: black;
 }
