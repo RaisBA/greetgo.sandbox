@@ -22,8 +22,9 @@ public class ClientController implements Controller {
   @ToJson
   @NoSecurity
   @Mapping("/list")
-  public List<ClientInfo> getClientList() {
-    return clientRegister.get().getClientList();
+  public List<ClientInfo> getClientList(@Par("sort") Integer sortType, @Par("direction") Integer sortDirect,
+                                        @Par("pageNum") Integer pageNum) {
+    return clientRegister.get().getClientList(sortType, sortDirect, pageNum);
   }
 
   @ToJson
@@ -66,5 +67,17 @@ public class ClientController implements Controller {
   @Mapping("/save")
   public void saveClient(@Par("client") @Json ClientDetails clientDetails){
     clientRegister.get().saveClient(clientDetails);
+  }
+
+  @ToJson
+  @Mapping("/delete")
+  public void deleteClient(@Par("clientId") String clientId){
+    clientRegister.get().deleteClient(clientId);
+  }
+
+  @ToJson
+  @Mapping("/pages")
+  public PageResultInfo pages(@Par("page") Integer page){
+    return clientRegister.get().chekPage(page);
   }
 }

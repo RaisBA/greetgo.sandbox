@@ -4,16 +4,14 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 @Bean
 public class ClientRegisterStand implements ClientRegister {
 
+  private final static int PAGE_SIZE = 20;
   private static int phoneId = 124512;
   private static int clientId = 124512;
   private Map<String, List<PhoneInfo>> phonesL = new LinkedHashMap<>();
@@ -88,7 +86,6 @@ public class ClientRegisterStand implements ClientRegister {
       c2.minScore = 12126;
       c2.totalScore = 1000.112;
 
-      clients.put(c2.id, c2);
       ClientDetails res = new ClientDetails();
       res.id = "2";
       res.name = "Егор";
@@ -111,12 +108,61 @@ public class ClientRegisterStand implements ClientRegister {
       res.phones = phones;
 
       clientDetails.put("2", res);
+      clients.put("2", c2);
+      clients.put("3", c2);
+      clients.put("4", c2);
+      clients.put("5", c2);
+      clients.put("6", c2);
+      clients.put("7", c2);
+      clients.put("8", c2);
+      clients.put("9", c2);
+      clients.put("10", c2);
+      clients.put("12", c2);
+      clients.put("13", c2);
+      clients.put("14", c2);
+      clients.put("15", c2);
+      clients.put("16", c2);
+      clients.put("17", c2);
+      clients.put("18", c2);
+      clients.put("19", c2);
+      clients.put("11", c2);
+      clients.put("20", c2);
+      clients.put("22", c2);
+      clients.put("23", c2);
+      clients.put("24", c2);
+      clients.put("25", c2);
+      clients.put("26", c2);
+      clients.put("27", c2);
+      clients.put("28", c2);
+      clients.put("29", c2);
+      clients.put("21", c2);
     }
   }
 
   @Override
-  public List<ClientInfo> getClientList() {
-    return new LinkedList<>(clients.values());
+  public List<ClientInfo> getClientList(Integer sortType, Integer sortDirect, Integer pageNum) {
+    if (sortType == null) {
+      return clients.values().stream().skip((pageNum-1) * PAGE_SIZE).limit(PAGE_SIZE).collect(Collectors.toList());
+    }
+
+    return clients.values().stream()
+      .sorted((t1, t2) -> {
+      switch (sortType){
+        case 1:
+          return  (sortDirect * Integer.compare(t1.age, t2.age));
+        case 2:
+          return  (sortDirect * Double.compare(t1.totalScore, t2.totalScore));
+        case 3:
+          return  (sortDirect * Double.compare(t1.maxScore, t2.maxScore));
+        case 4:
+          return  (sortDirect * Double.compare(t1.minScore, t2.minScore));
+        default:
+          return 0;
+      }
+    })
+      .skip((pageNum-1) * PAGE_SIZE)
+      .limit(PAGE_SIZE)
+      .collect(Collectors.toList());
   }
 
   @Override
@@ -202,5 +248,32 @@ public class ClientRegisterStand implements ClientRegister {
     cI.charm = charms.get(clientDetails.charm);
 
     this.clients.put(cI.id, cI);
+  }
+
+  @Override
+  public PageResultInfo chekPage(int page) {
+    PageResultInfo result = new PageResultInfo();
+    if (page > 9){
+      page = 9;
+    }
+    result.page = page;
+    int i = page - 1;
+
+    if (page == 1){
+      i++;
+    }
+
+    if (i >  1){
+      result.pagesList.add("...");
+    }
+    for(; i <= page + 1 && i <= 9; i++){
+      result.pagesList.add("" + i);
+    }
+
+    if (i <= 9){
+      result.pagesList.add("...");
+    }
+
+    return result;
   }
 }

@@ -4,5 +4,5 @@ export class SortInfo{
 }
 
 export enum SortType{
-    AGE, TOTAL_SCORE, MAX_SCORE, MIN_SCORE, NON
+    NON, AGE, TOTAL_SCORE, MAX_SCORE, MIN_SCORE
 }

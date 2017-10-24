@@ -65,3 +65,7 @@ td label{
 td label:hover{
     color: black;
 }
+
+.active{
+    color: #000;
+}

@@ -32,6 +32,7 @@ export class ClientEditWindowComponent{
     saveEdit(clientInfo, addresses, phoneList){
         let result = new ClientDetails();
         result.id = this.client.id;
+        result.birthDate = clientInfo["birthday"];
         result.name = clientInfo["name"];
         result.surname = clientInfo["surname"];
         result.patronymic = clientInfo["patronymic"];
@@ -64,9 +65,13 @@ export class ClientEditWindowComponent{
 
     addNewPhone(num, type){
         this.newPhone.emit({"clientID":this.client.id, "num":num, "type":type});
+        (<HTMLInputElement>document.getElementsByName("newPhoneNum")[0]).value = '';
     }
 
     deletePhone(phone){
-        this.deletePhoneOut.emit({id:phone["id"], num:phone["num"], clientId:this.client.id});
+        let q = window.confirm("Удалить телефон?");
+        if (q){
+            this.deletePhoneOut.emit({id:phone["id"], num:phone["num"], clientId:this.client.id});
+        }
     }
 }

@@ -3,9 +3,9 @@ import {HttpService} from "../HttpService";
 import {ClientInfo} from "../../model/ClientInfo";
 import {ClientEditWindowComponent} from "../client_edit_window/client_edit_window.component";
 import {ClientDetails} from "../../model/ClientDetails";
-import {error} from "util";
 import {PhoneInfo} from "../../model/PhoneInfo";
 import {SortType} from "../../model/SortInfo";
+
 @Component({
     selector: 'client-list-component',
     styles: [require('./client_list.component.css')],
@@ -21,25 +21,25 @@ import {SortType} from "../../model/SortInfo";
                 <th><label>Характер</label></th>
                 <th (click)="changeSort('AGE')">
                     <div name="ageSort">Возраст
-                        <label *ngIf="sortFlag == 1 && sortT == 0">&#8595;</label>
-                        <label *ngIf="sortFlag == -1 && sortT == 0">&#8593;</label>
-                        <label *ngIf="sortT != 0">&nbsp;&#183;</label>
+                        <label *ngIf="sortFlag == 1 && sortT == 1">&#8595;</label>
+                        <label *ngIf="sortFlag == -1 && sortT == 1">&#8593;</label>
+                        <label *ngIf="sortT != 1">&nbsp;&#183;</label>
                     </div>
                 </th>
                 <th (click)="changeSort('TOTAL_SCORE')">Общий остаток счета
-                    <label *ngIf="sortFlag == 1 && sortT == 1">&#8595;</label>
-                    <label *ngIf="sortFlag == -1 && sortT == 1">&#8593;</label>
-                    <label *ngIf="sortT != 1">&nbsp;&#183;</label>
-                </th>
-                <th (click)="changeSort('MAX_SCORE')">Максимальный счет
                     <label *ngIf="sortFlag == 1 && sortT == 2">&#8595;</label>
                     <label *ngIf="sortFlag == -1 && sortT == 2">&#8593;</label>
                     <label *ngIf="sortT != 2">&nbsp;&#183;</label>
                 </th>
-                <th (click)="changeSort('MIN_SCORE')">Минимальный счет
-                    <label *ngIf="sortFlag == 1 && sortT == 3">&#8595;</label>  
+                <th (click)="changeSort('MAX_SCORE')">Максимальный счет
+                    <label *ngIf="sortFlag == 1 && sortT == 3">&#8595;</label>
                     <label *ngIf="sortFlag == -1 && sortT == 3">&#8593;</label>
                     <label *ngIf="sortT != 3">&nbsp;&#183;</label>
+                </th>
+                <th (click)="changeSort('MIN_SCORE')">Минимальный счет
+                    <label *ngIf="sortFlag == 1 && sortT == 4">&#8595;</label>  
+                    <label *ngIf="sortFlag == -1 && sortT == 4">&#8593;</label>
+                    <label *ngIf="sortT != 4">&nbsp;&#183;</label>
                 </th>
                 <th>&nbsp;</th>
                 <th>&nbsp;</th>
@@ -63,19 +63,31 @@ import {SortType} from "../../model/SortInfo";
                     <label (click)="deleteClient(client.id)">| - |</label>
                 </td>
             </tr>
-        <client-edit-window #clientEditWindowComponent
-            (newPhone)="addNewPhone($event)"
-            (deletePhoneOut)="deletePhone($event)"
-            (save)="saveClientEdit($event)"
-            ></client-edit-window>
-        </table>
-        </div>
+            <client-edit-window #clientEditWindowComponent
+                (newPhone)="addNewPhone($event)"
+                (deletePhoneOut)="deletePhone($event)"
+                (save)="saveClientEdit($event)"
+                ></client-edit-window>
+            </table>
+            <div align="center" style="width: 25%">
+                <ul class="pager">
+                    <li class="previous"><a href="#" (click)="previousPage()">Назад</a></li>
+                    <li>
+                        <a style="font-size: small" href="#" *ngFor="let page of pages" id="pageNum{{page}}"
+                            [ngClass]="{'active':page==selectPage}" (click)="changePage(page)">{{page}}</a>
+                    </li>
+                    <li class="next"><a href="#" (click)="nextPage()">Вперед</a></li>
+                </ul>
+            </div>
+        </div>      
     <div>
     `,
 })
 export class ClientListComponent  implements OnInit{
     @Output() exit = new EventEmitter<void>();
 
+    pages: Array<any> = [1, 2, 3, '...'];
+    selectPage: number = 1;
     clients: Array<ClientInfo> | null = [];
     sortT: SortType = SortType.NON;
     canEdit: boolean = true;
@@ -104,6 +116,7 @@ export class ClientListComponent  implements OnInit{
                 } else {
                     this.sortFlag *= -1;
                 }
+                this.getClientList();
                 break;
             case  "TOTAL_SCORE":
                 if (this.sortT != SortType.TOTAL_SCORE){
@@ -112,6 +125,7 @@ export class ClientListComponent  implements OnInit{
                 } else {
                     this.sortFlag *= -1;
                 }
+                this.getClientList();
                 break;
             case "MAX_SCORE":
                 if (this.sortT != SortType.MAX_SCORE){
@@ -120,6 +134,7 @@ export class ClientListComponent  implements OnInit{
                 } else {
                     this.sortFlag *= -1;
                 }
+                this.getClientList();
                 break;
             case "MIN_SCORE":
                 if (this.sortT != SortType.MIN_SCORE){
@@ -128,6 +143,7 @@ export class ClientListComponent  implements OnInit{
                 } else {
                     this.sortFlag *= -1;
                 }
+                this.getClientList();
                 break;
         }
     }// end changeSort
@@ -143,21 +159,33 @@ export class ClientListComponent  implements OnInit{
     }
 
     deleteClient(id){
+        let q = window.confirm("Удалить клиента?");
+        if (q){
+            this.httpService.get("/client/delete", {clientId:id}).toPromise().then(res =>{
+                    window.alert("Клиент удален");
+                    this.getClientList();
+                }, error => {
+                    console.log(error);
+                }
 
+            );
+        }
     }
 
     addNewClient(){
         this.clientEditWindowComponent.isNew = true;
+        this.getClientDetails(null)
         this.getGenders();
         this.getCharms();
         this.getPhoneTypes();
-        this.clientEditWindowComponent.client = new ClientDetails();
         this.clientEditWindowComponent.showWindow = true;
         console.log("add new client");
     }
 
     getClientList(){
-        this.httpService.get("/client/list").toPromise().then(res => {
+        console.log({'sort':this.sortT, 'direction':this.sortFlag, 'pageNum':this.selectPage});
+        this.httpService.get("/client/list", {'sort':this.sortT, 'direction':this.sortFlag, 'pageNum':this.selectPage}).
+        toPromise().then(res => {
                 this.clients = res.json();
             },
             error => {
@@ -172,7 +200,6 @@ export class ClientListComponent  implements OnInit{
             }, error => {
                 console.log("/client/details" + error);
             }
-
         );
     }
 
@@ -221,7 +248,6 @@ export class ClientListComponent  implements OnInit{
 
     saveClientEdit(event){
         this.clientEditWindowComponent.canEdit = false;
-        console.log(event);
         this.httpService.post("/client/save", {client:JSON.stringify(event)}).toPromise().then(res => {
             this.clientEditWindowComponent.showWindow = false;
             this.clientEditWindowComponent.client = new ClientDetails();
@@ -240,5 +266,32 @@ export class ClientListComponent  implements OnInit{
             console.log(error);
         });
         this.clientEditWindowComponent.canEdit = true;
+    }
+
+    changePage(page){
+        if (page.toString() == '...'){
+            return;
+        }
+        this.httpService.get("/client/pages", {'page':page}).toPromise().then(
+            res => {
+                console.log(res.json());
+                this.selectPage = res.json()["page"];
+                this.pages = res.json()["pagesList"];
+                this.getClientList();
+            },
+            error => {
+                console.log(error);
+            }
+        );
+    }
+
+    previousPage(){
+        if (this.selectPage > 1){
+            this.changePage(this.selectPage - 1);
+        }
+    }
+
+    nextPage(){
+        this.changePage(this.selectPage + 1);
     }
 }
