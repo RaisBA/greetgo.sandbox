@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.controller.model;
 
 
-
 public class ClientInfo {
   public String id;
   public String fullName;
@@ -10,4 +9,17 @@ public class ClientInfo {
   public double totalScore;
   public double maxScore;
   public double minScore;
+
+  @Override
+  public String toString() {
+    return "ClientInfo{" +
+      "id='" + id + '\'' +
+      ", fullName='" + fullName + '\'' +
+      ", charm='" + charm + '\'' +
+      ", age=" + age +
+      ", totalScore=" + totalScore +
+      ", maxScore=" + maxScore +
+      ", minScore=" + minScore +
+      '}';
+  }
 }

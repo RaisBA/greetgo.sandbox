@@ -58,7 +58,7 @@ public class ClientRegisterStand implements ClientRegister {
       res.patronymic = "Иванович";
       res.birthDate = "2005-09-12";
       res.charm = "CHARM_2";
-      res.gender = "NON";
+      res.gender = "NO";
       AddressInfo regAddress = new AddressInfo();
       regAddress.flat = "12";
       regAddress.house = "1";
@@ -193,7 +193,7 @@ public class ClientRegisterStand implements ClientRegister {
 
     list.add(new Directory("MALE", "Мужчина"));
     list.add(new Directory("FEMALE", "Женщина"));
-    list.add(new Directory("NON", "Все сложно"));
+    list.add(new Directory("NO", "Все сложно"));
 
     return list;
   }

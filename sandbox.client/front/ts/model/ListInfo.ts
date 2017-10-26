@@ -1,6 +1,5 @@
 import {SortInfo} from "./SortInfo";
-import {PageInfo} from "./PageInfo";
-export class ListInfo{
+export class ListInfo {
     sortInfo: SortInfo;
     pageNum: number;
 }

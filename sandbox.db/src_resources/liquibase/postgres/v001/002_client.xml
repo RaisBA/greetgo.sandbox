@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="bayakhmetov" id="create-table-charm">
+        <sql endDelimiter=";;"><![CDATA[
+      create table charm (
+        id SERIAL primary key,
+        name varchar(255) not null,
+        description varchar (255),
+        energy real,
+        actual boolean
+      )
+    ]]></sql>
+    </changeSet>
+
+    <changeSet author="bayakhmetov" id="create-table-client">
+        <sql endDelimiter=";;"><![CDATA[
+     create table client (
+        id SERIAL primary key,
+        name varchar(255),
+        surname varchar(255),
+        patronymic varchar(255),
+        gender varchar(30),
+        birth_date date,
+        charm_id integer references charm(id),
+        actual boolean
+      )
+    ]]></sql>
+    </changeSet>
+
+    <changeSet author="bayakhmetov" id="create-table-client-address">
+        <sql endDelimiter=";;"><![CDATA[
+     create table client_address(
+             client_id integer references client(id),
+             type varchar(30) not null,
+             street varchar(255),
+             house varchar(255),
+             flat varchar(255),
+             actual boolean,
+             primary key (client_id, type)
+)
+    ]]></sql>
+    </changeSet>
+
+    <changeSet author="bayakhmetov" id="create-table-client-phone">
+        <sql endDelimiter=";;"><![CDATA[
+             create table client_phone(
+                  id SERIAL,
+                  client_id integer references client(id),
+                  phone_num varchar(50) not null,
+                  type varchar(50),
+                  actual boolean,
+                  primary key (client_id, phone_num)
+             )
+    ]]></sql>
+    </changeSet>
+
+    <changeSet author="bayakhmetov" id="create-table-client-account">
+        <sql endDelimiter=";;"><![CDATA[
+         create table client_account(
+              id SERIAL,
+              client_id integer references client(id),
+              money real,
+              num varchar(255),
+              registered_at TimeStamp,
+              actual boolean,
+              primary key (client_id, id)
+         )
+    ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>
