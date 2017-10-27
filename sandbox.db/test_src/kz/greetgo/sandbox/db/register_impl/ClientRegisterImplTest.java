@@ -1,33 +1,24 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.Directory;
-import kz.greetgo.sandbox.controller.model.Genders;
-import kz.greetgo.sandbox.controller.model.PhoneTypes;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
  * Набор автоматизированных тестов для тестирования методов класса {@link ClientRegisterImpl}
  */
+@SuppressWarnings("Duplicates")
 public class ClientRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<ClientRegister> clientRegister;
@@ -59,6 +50,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void getCharms() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
     clientTestDao.get().clearCharm();
     int size = 10;
 
@@ -83,6 +78,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void getClientListNoPageNoSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
     clientTestDao.get().clearClientAccount();
     clientTestDao.get().clearClient();
     clientTestDao.get().clearCharm();
@@ -112,8 +109,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
 
     // Загрузка аккаунтов
-    for (int i = 0; i < size * 2; i++){
-      int clientId =  RND.plusInt(size);
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
       double money = RND.plusDouble(100000, 2);
 
       clientTestDao.get().insertClientAccount(RND.plusInt(1000), clientId, money,
@@ -121,8 +118,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
       ClientInfo info = in.get(clientId + "");
       info.totalScore += money;
-      if(info.maxScore < money) info.maxScore = money;
-      if(info.minScore > money || info.minScore == 0) info.minScore = money;
+      if (info.maxScore < money) info.maxScore = money;
+      if (info.minScore > money || info.minScore == 0) info.minScore = money;
 
       in.put(clientId + " ", info);
     }
@@ -147,6 +144,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void getClientListPage() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
     clientTestDao.get().clearClientAccount();
     clientTestDao.get().clearClient();
     clientTestDao.get().clearCharm();
@@ -170,11 +169,379 @@ public class ClientRegisterImplTest extends ParentTestNg {
         birthDay, Integer.parseInt(charm.code), true);
     }
 
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(null, null, 1);
+      assertThat(list).hasSize(20);
+      assertThat(list.get(0).id).isEqualTo(ids.get(0));
+      assertThat(list.get(19).id).isEqualTo(ids.get(19));
+    }
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(null, null, 2);
+      assertThat(list).hasSize(size - 20);
+      assertThat(list.get(0).id).isEqualTo(ids.get(20));
+      assertThat(list.get(list.size() - 1).id).isEqualTo(ids.get(size - 1));
+    }
 
-    List<ClientInfo> list = clientRegister.get().getClientList(null, null, 1);
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(null, null, 2);
+      assertThat(list).hasSize(size - 20);
+      assertThat(list.get(0).id).isEqualTo(ids.get(20));
+      assertThat(list.get(list.size() - 1).id).isEqualTo(ids.get(size - 1));
+    }
+  }
+
+  @Test
+  public void getClientListNoSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    int size = 30;
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    // Загрузка клиентов
+    for (int i = 0; i < size; i++) {
+      String name = RND.str(10);
+      String surname = RND.str(10);
+      String patronymic = RND.str(10);
+      Date birthDay = RND.dateYears(-100, 0);
+      ClientInfo info = new ClientInfo();
+      info.id = i + "";
+      info.fullName = surname + " " + name + " " + patronymic;
+      info.charm = charm.name;
+      info.age = ageBetween(birthDay, new Date());
+      clientTestDao.get().insertClient(i, name, surname, patronymic, "MALE",
+        birthDay, Integer.parseInt(charm.code), true);
+    }
+
+    // Загрузка аккаунтов
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+    }
+
+    List<ClientInfo> list = clientRegister.get().getClientList(89, 1, 1);
     assertThat(list).hasSize(20);
-    assertThat(list.get(0).id).isEqualTo(ids.get(0));
-    assertThat(list.get(19).id).isEqualTo(ids.get(19));
+
+    //noinspection ResultOfMethodCallIgnored
+    list.stream().sorted((t1, t2) -> {
+
+      int id1 = Integer.parseInt(t1.id);
+      int id2 = Integer.parseInt(t2.id);
+      assertThat(Integer.compare(id2, id1)).isLessThanOrEqualTo(0);
+
+      return 0;
+    }).collect(Collectors.toList());
+  }
+
+  @Test
+  public void getClientListAgeSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    int size = 30;
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    // Загрузка клиентов
+    for (int i = 0; i < size; i++) {
+      String name = RND.str(10);
+      String surname = RND.str(10);
+      String patronymic = RND.str(10);
+      Date birthDay = RND.dateYears(-100, 0);
+      ClientInfo info = new ClientInfo();
+      info.id = i + "";
+      info.fullName = surname + " " + name + " " + patronymic;
+      info.charm = charm.name;
+      info.age = ageBetween(birthDay, new Date());
+      clientTestDao.get().insertClient(i, name, surname, patronymic, "MALE",
+        birthDay, Integer.parseInt(charm.code), true);
+    }
+
+    // Загрузка аккаунтов
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(1, 1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Integer.compare(t2.age, t1.age)).isLessThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(1, -1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Integer.compare(t2.age, t1.age)).isGreaterThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+  }
+
+  @Test
+  public void getClientListTotalScoreSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    int size = 30;
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+
+    // Загрузка клиентов
+    for (int i = 0; i < size; i++) {
+      String name = RND.str(10);
+      String surname = RND.str(10);
+      String patronymic = RND.str(10);
+      Date birthDay = RND.dateYears(-100, 0);
+      ClientInfo info = new ClientInfo();
+      info.id = i + "";
+      info.fullName = surname + " " + name + " " + patronymic;
+      info.charm = charm.name;
+      info.age = ageBetween(birthDay, new Date());
+      clientTestDao.get().insertClient(i, name, surname, patronymic, "MALE",
+        birthDay, Integer.parseInt(charm.code), true);
+    }
+
+    // Загрузка аккаунтов
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(2, 1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.totalScore, t1.totalScore)).isLessThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(2, -1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.totalScore, t1.totalScore)).isGreaterThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+  }
+
+  @Test
+  public void getClientListMaxScoreSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    int size = 30;
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    // Загрузка клиентов
+    for (int i = 0; i < size; i++) {
+      String name = RND.str(10);
+      String surname = RND.str(10);
+      String patronymic = RND.str(10);
+      Date birthDay = RND.dateYears(-100, 0);
+      ClientInfo info = new ClientInfo();
+      info.id = i + "";
+      info.fullName = surname + " " + name + " " + patronymic;
+      info.charm = charm.name;
+      info.age = ageBetween(birthDay, new Date());
+      clientTestDao.get().insertClient(i, name, surname, patronymic, "MALE",
+        birthDay, Integer.parseInt(charm.code), true);
+    }
+
+    // Загрузка аккаунтов
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(3, 1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.maxScore, t1.maxScore)).isLessThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(3, -1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.maxScore, t1.maxScore)).isGreaterThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+  }
+
+  @Test
+  public void getClientListMinScoreSort() throws Exception {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    int size = 30;
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    // Загрузка клиентов
+    for (int i = 0; i < size; i++) {
+      String name = RND.str(10);
+      String surname = RND.str(10);
+      String patronymic = RND.str(10);
+      Date birthDay = RND.dateYears(-100, 0);
+      ClientInfo info = new ClientInfo();
+      info.id = i + "";
+      info.fullName = surname + " " + name + " " + patronymic;
+      info.charm = charm.name;
+      info.age = ageBetween(birthDay, new Date());
+      clientTestDao.get().insertClient(i, name, surname, patronymic, "MALE",
+        birthDay, Integer.parseInt(charm.code), true);
+    }
+
+    // Загрузка аккаунтов
+    for (int i = 0; i < size * 2; i++) {
+      int clientId = RND.plusInt(size);
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(4, 1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.minScore, t1.minScore)).isLessThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+
+    {
+      List<ClientInfo> list = clientRegister.get().getClientList(4, -1, 1);
+      assertThat(list).hasSize(20);
+
+      //noinspection ResultOfMethodCallIgnored
+      list.stream().sorted((t1, t2) -> {
+
+        assertThat(Double.compare(t2.minScore, t1.minScore)).isGreaterThanOrEqualTo(0);
+
+        return 0;
+      }).collect(Collectors.toList());
+    }
+  }
+
+  @Test
+  public void getClientDetails() {
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    String name = RND.str(10);
+    String surname = RND.str(10);
+    String patronymic = RND.str(10);
+    String gender = "MALE";
+    Date birthDay = RND.dateYears(-100, 0);
+    ClientInfo info = new ClientInfo();
+    int i = RND.plusInt(100);
+    info.id = i + "";
+    info.fullName = surname + " " + name + " " + patronymic;
+    info.charm = charm.name;
+    info.age = ageBetween(birthDay, new Date());
+
+    clientTestDao.get().insertClient(i, name, surname, patronymic, gender,
+      birthDay, Integer.parseInt(charm.code), true);
+
+    AddressInfo regAddr = new AddressInfo();
+    regAddr.street = RND.str(10);
+    regAddr.house = RND.str(10);
+    regAddr.flat = RND.str(10);
+    clientTestDao.get().insertClientAddress(i, AddressTypes.REGISTRATION.name(), regAddr.street,
+      regAddr.house, regAddr.flat, true);
+
+    AddressInfo factAddr = new AddressInfo();
+    factAddr.street = RND.str(10);
+    factAddr.house = RND.str(10);
+    factAddr.flat = RND.str(10);
+    clientTestDao.get().insertClientAddress(i, AddressTypes.FACTUAL.name(), factAddr.street,
+      factAddr.house, factAddr.flat, true);
+
 
   }
 
@@ -205,47 +572,4 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     return age;
   }
-
-  private static int i = 0;
-
-  public static void main(String[] args) throws IOException {
-    String fileName = "loaded.txt";
-    URL url = new URL("http://media.corporate-ir.net/media_files/IROL/17/176060/img/logos/amazon_logo_RGB.jpg");
-
-    URLConnection con = url.openConnection();
-    System.out.println(con.getContent().toString());
-    System.out.println(con.getHeaderFields());
-    Map header = con.getHeaderFields();
-    System.out.println(header.get("Content"));
-
-   InputStream in = new BufferedInputStream(url.openStream());
-    FileOutputStream out = new FileOutputStream(fileName);
-
-    System.out.println("Download start!");
-
-    byte buffer[] = new byte[1024];
-    while(in.read(buffer) != -1) {
-      out.write(buffer);
-    }
-    System.out.println("Download finish!");
-
-    in.close();
-    out.close();
-/*
-    ZipFile z = new ZipFile("/home/rbayakhmetov/Pictures/Pictures.zip");
-    z.stream().forEach((Consumer<ZipEntry>) zipEntry -> {
-      try {
-        System.out.println(zipEntry.getName());
-        BufferedImage image = ImageIO.read(z.getInputStream(zipEntry));
-        if (image != null) {
-          ImageIO.write(image, "png", new File("file" + i + ".png"));
-          i++;
-        }
-      } catch (IOException e) {
-        System.out.println(Arrays.toString(e.getStackTrace()));
-      }
-    });
-    z.close();*/
-  }
-
 }

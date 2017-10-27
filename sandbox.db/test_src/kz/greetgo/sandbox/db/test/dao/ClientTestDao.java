@@ -25,6 +25,19 @@ public interface ClientTestDao {
                            @Param("money") Double money, @Param("num") String num,
                            @Param("register_at") Date registerAt, @Param("actual") Boolean actual);
 
+  @Insert("insert into client_address (client_id, type, street, house, flat, actual)"
+    + " values (#{clientId}, #{type}, #{street}, #{house}, #{flat}, #{actual})")
+  void insertClientAddress(@Param("clientId") Integer clientId,
+                           @Param("type") String  type, @Param("street") String street,
+                           @Param("house") String  house, @Param("flat") String  flat,
+                           @Param("actual") Boolean actual);
+
+  @Insert("insert into client_phone (id, client_id, phone_num, type, actual)"
+    + " values (#{id}, #{clientId}, #{phone_num}, #{type}, #{actual})")
+  void insertClientPhone(@Param("id") Integer id, @Param("clientId") Integer clientId,
+                         @Param("phone_num") String phoneNum, @Param("type") String type,
+                         @Param("actual") Boolean actual);
+
 
   @Delete("delete from charm")
   void clearCharm();
@@ -34,4 +47,10 @@ public interface ClientTestDao {
 
   @Delete("delete from client_account")
   void clearClientAccount();
+
+  @Delete("delete from client_phone")
+  void clearPhone();
+
+  @Delete("delete from client_address")
+  void clearAddress();
 }

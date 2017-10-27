@@ -13,34 +13,36 @@ import java.util.List;
 
 public class ClientListCallback implements ConnectionCallback<List<ClientInfo>> {
 
-  private String  sortColumn;
-  private String  sortDirect;
+  private String sortColumn;
+  private String sortDirect;
   private Integer pageNum;
   private Integer pageSize;
 
   private final StringBuilder sql = new StringBuilder();
+  @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final List<Object> params = new LinkedList<>();
 
-  public ClientListCallback(Integer sortType, Integer sortDirect, Integer pageSize ,Integer pageNum){
+  public ClientListCallback(Integer sortType, Integer sortDirect, Integer pageSize, Integer pageNum) {
 
     this.sortColumn = getSortColumn(sortType);
     this.sortDirect = getSortDirect(sortDirect);
     this.pageSize = pageSize;
     this.pageNum = pageNum;
+    if(pageNum <= 0) this.pageNum = 1;
   }
 
   @Override
   public List<ClientInfo> doInConnection(Connection connection) throws Exception {
     createSql();
 
-    try(PreparedStatement ps = connection.prepareStatement(sql.toString())){
+    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
-      int i  = 1;
+      int i = 1;
       for (Object o : params) {
         ps.setObject(i++, o);
       }
 
-      try(ResultSet rs = ps.executeQuery();){
+      try (ResultSet rs = ps.executeQuery()) {
         List<ClientInfo> result = new LinkedList<>();
 
         while (rs.next()) {
@@ -54,21 +56,21 @@ public class ClientListCallback implements ConnectionCallback<List<ClientInfo>> 
 
   }
 
-  private ClientInfo toInfo(ResultSet rs) throws SQLException{
+  private ClientInfo toInfo(ResultSet rs) throws SQLException {
     ClientInfo result = new ClientInfo();
 
     result.id = rs.getString("id");
     result.fullName = rs.getString("fullName");
     result.age = rs.getInt("age");
     result.charm = rs.getString("charm");
-    result.totalScore= rs.getDouble("totalScore");
+    result.totalScore = rs.getDouble("totalScore");
     result.maxScore = rs.getDouble("maxScore");
     result.minScore = rs.getDouble("minScore");
 
     return result;
   }
 
-  private void appendSelect(){
+  private void appendSelect() {
     sql.append("with money as (");
     sql.append("  select client_id, sum(money) as total_score, max(money) as max_score, min(money) as min_score");
     sql.append("  from client_account group by client_id");
@@ -79,12 +81,12 @@ public class ClientListCallback implements ConnectionCallback<List<ClientInfo>> 
     sql.append(", c.surname||' '||c.name||' '||c.patronymic as fullName");
     sql.append(", extract ( YEAR from age(now(), c.birth_date)) as age");
     sql.append(", ch.name as charm");
-    sql.append(", m.total_score as totalScore");
-    sql.append(", m.max_score as maxScore");
-    sql.append(", m.min_score as minScore ");
+    sql.append(", coalesce(m.total_score, 0) as totalScore");
+    sql.append(", coalesce(m.max_score, 0) as maxScore");
+    sql.append(", coalesce(m.min_score, 0) as minScore ");
   }
 
-  private void createSql(){
+  private void createSql() {
     appendSelect();
 
     sql.append("from client c");
@@ -105,7 +107,7 @@ public class ClientListCallback implements ConnectionCallback<List<ClientInfo>> 
   }
 
   private String getSortDirect(Integer sortDirect) {
-    if (sortDirect == null || sortDirect > 0) {
+    if (sortDirect == null || sortDirect >= 0) {
       return "asc";
     }
 
