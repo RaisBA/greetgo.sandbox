@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -507,6 +508,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void getClientDetails() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
     Directory charm = new Directory();
     charm.name = RND.str(10);
     charm.code = RND.intStr(2);
@@ -542,21 +548,282 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertClientAddress(i, AddressTypes.FACTUAL.name(), factAddr.street,
       factAddr.house, factAddr.flat, true);
 
+    Map<String, PhoneInfo> phoneInfo = new HashMap<>();
+
+    for (int j = 0, n = PhoneTypes.values().length; j < n; j++) {
+      PhoneInfo p = new PhoneInfo();
+      p.id = j + "";
+      p.num = RND.intStr(12);
+      p.type = PhoneTypes.values()[j].name();
+      clientTestDao.get().insertClientPhone(Integer.parseInt(p.id), i, p.num, p.type, true);
+      phoneInfo.put(p.id, p);
+    }
+
+
+    ClientDetails details = clientRegister.get().getClientDetails(i + "");
+
+    assertThat(details).isNotNull();
+    assertThat(details.id).isEqualTo(info.id);
+    assertThat(details.name).isEqualTo(name);
+    assertThat(details.surname).isEqualTo(surname);
+    assertThat(details.patronymic).isEqualTo(patronymic);
+    assertThat(details.gender).isEqualTo(gender);
+    assertThat(details.charm).isEqualTo(charm.code);
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    assertThat(details.birthDate).isEqualTo(sdf.format(birthDay));
+
+
+    assertThat(details.regAddress.street).isEqualTo(regAddr.street);
+    assertThat(details.regAddress.house).isEqualTo(regAddr.house);
+    assertThat(details.regAddress.flat).isEqualTo(regAddr.flat);
+
+    assertThat(details.factAddress.street).isEqualTo(factAddr.street);
+    assertThat(details.factAddress.house).isEqualTo(factAddr.house);
+    assertThat(details.factAddress.flat).isEqualTo(factAddr.flat);
+
+    for (PhoneInfo phone : details.phones) {
+      assertThat(phoneInfo).containsKey(phone.id);
+      PhoneInfo info1 = phoneInfo.get(phone.id);
+      assertThat(phone.num).isEqualTo(info1.num);
+      assertThat(phone.type).isEqualTo(info1.type);
+    }
+  }
+
+  @Test
+  public void getClientDetailsNewClient() {
+    ClientDetails details = clientRegister.get().getClientDetails(null);
+
+    assertThat(details).isNotNull();
+    assertThat(details.id).isNotEmpty();
+    assertThat(details.phones).isEmpty();
+  }
+
+  @Test
+  public void chekPage() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+
+    for (int i = 0; i < 86; i++) {
+      clientTestDao.get().insertEmptyClient(true);
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(1);
+      assertThat(result.page).isEqualTo(1);
+      assertThat(result.pagesList).hasSize(3);
+      assertThat(result.pagesList.get(0)).isEqualTo("1");
+      assertThat(result.pagesList.get(1)).isEqualTo("2");
+      assertThat(result.pagesList.get(2)).isEqualTo("...");
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(2);
+      assertThat(result.page).isEqualTo(2);
+      assertThat(result.pagesList).hasSize(4);
+      assertThat(result.pagesList.get(0)).isEqualTo("1");
+      assertThat(result.pagesList.get(1)).isEqualTo("2");
+      assertThat(result.pagesList.get(2)).isEqualTo("3");
+      assertThat(result.pagesList.get(3)).isEqualTo("...");
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(3);
+      assertThat(result.page).isEqualTo(3);
+      assertThat(result.pagesList).hasSize(5);
+      assertThat(result.pagesList.get(0)).isEqualTo("...");
+      assertThat(result.pagesList.get(1)).isEqualTo("2");
+      assertThat(result.pagesList.get(2)).isEqualTo("3");
+      assertThat(result.pagesList.get(3)).isEqualTo("4");
+      assertThat(result.pagesList.get(4)).isEqualTo("...");
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(4);
+      assertThat(result.page).isEqualTo(4);
+      assertThat(result.pagesList).hasSize(4);
+      assertThat(result.pagesList.get(0)).isEqualTo("...");
+      assertThat(result.pagesList.get(1)).isEqualTo("3");
+      assertThat(result.pagesList.get(2)).isEqualTo("4");
+      assertThat(result.pagesList.get(3)).isEqualTo("5");
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(5);
+      assertThat(result.page).isEqualTo(5);
+      assertThat(result.pagesList).hasSize(3);
+      assertThat(result.pagesList.get(0)).isEqualTo("...");
+      assertThat(result.pagesList.get(1)).isEqualTo("4");
+      assertThat(result.pagesList.get(2)).isEqualTo("5");
+    }
+
+    {
+      PageResultInfo result = clientRegister.get().chekPage(6);
+      assertThat(result.page).isEqualTo(5);
+      assertThat(result.pagesList).hasSize(3);
+      assertThat(result.pagesList.get(0)).isEqualTo("...");
+      assertThat(result.pagesList.get(1)).isEqualTo("4");
+      assertThat(result.pagesList.get(2)).isEqualTo("5");
+    }
+  }
+
+
+  @Test
+  public void getNewPhone() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+
+
+    int clientId = RND.plusInt(100);
+    clientTestDao.get().insertClient(clientId, null, null, null, null,
+      null, null, true);
+
+    String num = RND.intStr(12);
+    {
+      PhoneInfo phone = clientRegister.get().getNewPhone(clientId + "", num, PhoneTypes.HOME.name());
+
+      assertThat(phone).isNotNull();
+      assertThat(phone.id).isNotNull();
+
+      assertThat(phone.num).isEqualTo(num);
+      assertThat(phone.type).isEqualTo(PhoneTypes.HOME.name());
+    }
+    {
+      PhoneInfo phone = clientRegister.get().getNewPhone(clientId + "", num, PhoneTypes.HOME.name());
+
+      assertThat(phone).isNull();
+    }
+  }
+
+  @Test
+  public void getNewPhoneHasDeactual() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+
+    int clientId = RND.plusInt(100);
+    clientTestDao.get().insertClient(clientId, null, null, null, null,
+      null, null, true);
+
+    String num = RND.intStr(12);
+
+    clientTestDao.get().insertClientPhone(123, clientId, num, PhoneTypes.HOME.name(), false);
+
+    PhoneInfo phone = clientRegister.get().getNewPhone(clientId + "", num, PhoneTypes.MOBILE.name());
+
+    assertThat(phone.id).isEqualTo(123 + "");
+    assertThat(phone.type).isEqualTo(PhoneTypes.MOBILE.name());
 
   }
 
   @Test
-  public void ageCountTest() throws Exception {
+  public void deletePhone() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
 
-    Date day = RND.dateYears(-100, 0);
-    Date td = new Date();
+    int clientId = RND.plusInt(100);
+    clientTestDao.get().insertClient(clientId, null, null, null, null,
+      null, null, true);
+    String num = RND.intStr(12);
+    int phoneId = RND.plusInt(125);
+    clientTestDao.get().insertClientPhone(phoneId, clientId, num, PhoneTypes.HOME.name(), false);
 
+    List<PhoneInfo> infos = clientRegister.get().deletePhone(clientId + "", phoneId + "", num);
 
-    System.out.println("\nFrom :" + day);
-    System.out.println("To :" + td);
-    System.out.println(ageBetween(day, td) + " ages");
-
+    assertThat(infos).isEmpty();
   }
+
+
+  @Test
+  public void saveClient() {
+    clientTestDao.get().clearAddress();
+    clientTestDao.get().clearPhone();
+    clientTestDao.get().clearClientAccount();
+    clientTestDao.get().clearClient();
+    clientTestDao.get().clearCharm();
+    Directory charm = new Directory();
+    charm.name = RND.str(10);
+    charm.code = RND.intStr(2);
+    clientTestDao.get().insertCharm(Integer.parseInt(charm.code), charm.name,
+      RND.str(10), (float) RND.plusDouble(1000, 2), true);
+
+    ClientDetails details = clientRegister.get().getClientDetails(null);
+
+    details.name = RND.str(10);
+    details.surname = RND.str(10);
+    details.patronymic = RND.str(10);
+    details.gender = "MALE";
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    details.birthDate = sdf.format(RND.dateYears(-100, 0));
+    details.charm = charm.code;
+
+    details.regAddress = new AddressInfo();
+    details.regAddress.street = RND.str(10);
+    details.regAddress.house = RND.str(10);
+    details.regAddress.flat = RND.str(10);
+
+    details.factAddress = new AddressInfo();
+    details.factAddress.street = RND.str(10);
+    details.factAddress.house = RND.str(10);
+    details.factAddress.flat = RND.str(10);
+
+    Map<String, PhoneInfo> phoneInfo = new HashMap<>();
+
+    for (int j = 0, n = PhoneTypes.values().length; j < n; j++) {
+      PhoneInfo p = new PhoneInfo();
+      p.id = j + "";
+      p.num = RND.intStr(12);
+      p.type = PhoneTypes.values()[j].name();
+      phoneInfo.put(p.id, p);
+      details.phones.add(p);
+      clientTestDao.get().insertClientPhone(Integer.parseInt(p.id), Integer.parseInt(details.id), p.num, p.type, true);
+    }
+
+
+    clientRegister.get().saveClient(details);
+
+    ClientDetails details1 = clientRegister.get().getClientDetails(details.id);
+
+    assertThat(details1).isNotNull();
+    assertThat(details1.id).isEqualTo(details.id);
+    assertThat(details1.name).isEqualTo(details.name);
+    assertThat(details1.surname).isEqualTo(details.surname);
+    assertThat(details1.patronymic).isEqualTo(details.patronymic);
+    assertThat(details1.gender).isEqualTo(details.gender);
+    assertThat(details1.charm).isEqualTo(charm.code);
+
+    assertThat(details1.birthDate).isEqualTo(details.birthDate);
+
+
+    assertThat(details1.regAddress.street).isEqualTo(details.regAddress.street);
+    assertThat(details1.regAddress.house).isEqualTo(details.regAddress.house);
+    assertThat(details1.regAddress.flat).isEqualTo(details.regAddress.flat);
+
+    assertThat(details1.factAddress.street).isEqualTo(details.factAddress.street);
+    assertThat(details1.factAddress.house).isEqualTo(details.factAddress.house);
+    assertThat(details1.factAddress.flat).isEqualTo(details.factAddress.flat);
+
+    assertThat(details1.phones).hasSize(details.phones.size());
+
+    for (PhoneInfo phone : details1.phones) {
+      assertThat(phoneInfo).containsKey(phone.id);
+      PhoneInfo info1 = phoneInfo.get(phone.id);
+      assertThat(phone.num).isEqualTo(info1.num);
+      assertThat(phone.type).isEqualTo(info1.type);
+    }
+  }
+
 
   private int ageBetween(Date from, Date to) {
     GregorianCalendar start = new GregorianCalendar();

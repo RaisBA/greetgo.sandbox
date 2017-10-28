@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.register_impl;
 
-import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
@@ -9,13 +8,11 @@ import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.jdbc.ClientListCallback;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
-import java.sql.Connection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-
-import static kz.greetgo.sandbox.controller.model.Genders.FEMALE;
-import static kz.greetgo.sandbox.controller.model.Genders.MALE;
-import static kz.greetgo.sandbox.controller.model.Genders.NO;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
@@ -33,12 +30,37 @@ public class ClientRegisterImpl implements ClientRegister {
     pageNum = nullToZero(pageNum);
 
 
-    return jdbc.get().execute(new ClientListCallback(sortType, sortDirect, PAGE_SIZE ,pageNum));
+    return jdbc.get().execute(new ClientListCallback(sortType, sortDirect, PAGE_SIZE, pageNum));
   }
 
   @Override
   public ClientDetails getClientDetails(String id) {
-    throw new UnsupportedOperationException();
+
+    if (id == null) {
+      return getNewClientDetails();
+    }
+
+    Integer clientId = Integer.parseInt(id);
+    ClientDetails result = clientDao.get().loadDetails(clientId);
+
+    result.regAddress = clientDao.get().loadAddress(clientId, AddressTypes.REGISTRATION.name());
+    result.factAddress = clientDao.get().loadAddress(clientId, AddressTypes.FACTUAL.name());
+
+    if (result.regAddress == null) {
+      result.regAddress = new AddressInfo();
+    }
+
+    if (result.factAddress == null) {
+      result.factAddress = new AddressInfo();
+    }
+
+    result.phones = clientDao.get().loadPhones(clientId);
+
+    if (result.phones == null) {
+      result.phones = new ArrayList<>();
+    }
+
+    return result;
   }
 
   @Override
@@ -71,35 +93,149 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public PhoneInfo getNewPhone(String clientId, String num, String type) {
-    throw new UnsupportedOperationException();
+
+    PhoneInfo phone = clientDao.get().getPhone(Integer.parseInt(clientId), num, true);
+    if (phone != null) return null;
+
+    phone = clientDao.get().getPhone(Integer.parseInt(clientId), num, false);
+
+    if (phone != null) {
+      clientDao.get().updatePhone(Integer.parseInt(phone.id), num, type);
+      phone.type = type;
+      return phone;
+    }
+
+    Integer id = clientDao.get().insertPhone(Integer.parseInt(clientId), num, type);
+
+    phone = new PhoneInfo(id + "", num, type);
+
+    return phone;
   }
 
   @Override
   public List<PhoneInfo> deletePhone(String clientId, String id, String num) {
-    throw new UnsupportedOperationException();
+    clientDao.get().deletePhone(Integer.parseInt(id), num);
+
+
+    return clientDao.get().loadPhones(Integer.parseInt(clientId));
   }
 
   @Override
   public void deleteClient(String id) {
-    throw new UnsupportedOperationException();
+    clientDao.get().deleteClient(Integer.parseInt(id));
   }
 
   @Override
   public void saveClient(ClientDetails clientDetails) {
-    throw new UnsupportedOperationException();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date;
+    try {
+      date = sdf.parse(clientDetails.birthDate);
+    } catch (ParseException e) {
+      e.printStackTrace();
+      date = null;
+    }
+
+    clientDao.get().updateClient(Integer.parseInt(clientDetails.id), clientDetails.name, clientDetails.surname,
+      clientDetails.patronymic, clientDetails.gender,
+      date, (clientDetails.charm == null ? null : Integer.parseInt(clientDetails.charm)));
+
+    saveAddress(clientDetails.id, clientDetails.factAddress, AddressTypes.FACTUAL);
+    saveAddress(clientDetails.id, clientDetails.regAddress, AddressTypes.REGISTRATION);
+
+
+    for (PhoneInfo phone : clientDetails.phones) {
+      clientDao.get().updatePhone(Integer.parseInt(phone.id), phone.num, phone.type);
+    }
+
   }
 
   @Override
   public PageResultInfo chekPage(int page) {
-    throw new UnsupportedOperationException();
+    int minPage = 1;
+    int maxPage = getMaxPage();
+
+    page = scope(page, minPage, maxPage);
+
+    PageResultInfo result = new PageResultInfo();
+    result.page = page;
+
+    if (page > minPage + 1) {
+      result.pagesList.add("...");
+    }
+
+    for (int i = page - 1; (i <= page + 1 && i <= maxPage); i++) {
+
+      if (i == 0) continue;
+
+      result.pagesList.add(i + "");
+    }
+
+    if (page < maxPage - 1) {
+      result.pagesList.add("...");
+    }
+
+
+    return result;
+  }
+
+  private int scope(int value, int min, int max) {
+    if (value < min) {
+      return min;
+
+    } else if (value > max) {
+      return max;
+    }
+    return value;
+  }
+
+  private int getMaxPage() {
+    int maxPage = (int) Math.ceil(clientDao.get().clientCount() / (double) PAGE_SIZE);
+
+    if (maxPage < 1) {
+      maxPage = 1;
+    }
+
+    return maxPage;
   }
 
 
-  private Integer nullToZero(Integer integer) {
-    if(integer == null){
-      return 0;
+  private ClientDetails getNewClientDetails() {
+
+    ClientDetails result = new ClientDetails();
+
+    result.id = clientDao.get().newClient().toString();
+
+
+    return result;
+  }
+
+  private void saveAddress(String clientId, AddressInfo address, AddressTypes type) {
+
+    AddressInfo addressInfo = clientDao.get().loadAddress(Integer.parseInt(clientId), type.name());
+
+    if (addressInfo == null){
+
+      clientDao.get().insertAddress(Integer.parseInt(clientId), type.name(), address.street, address.house, address.flat);
+
+    } else {
+
+      clientDao.get().updateAddress(Integer.parseInt(clientId), type.name(), address.street, address.house, address.flat);
+
     }
 
+  }
+
+  private Integer nullToZero(Integer integer) {
     return (integer == null ? 0 : integer);
+  }
+
+  @SuppressWarnings("unused")
+  private static <T> T nullChek(T obj, Class<T> tClass) throws Exception {
+    if (obj == null) {
+      obj = tClass.newInstance();
+    }
+
+    return obj;
   }
 }

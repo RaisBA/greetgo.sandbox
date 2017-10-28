@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.controller.register;
 
 import kz.greetgo.sandbox.controller.model.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 public interface ClientRegister {
