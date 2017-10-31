@@ -144,6 +144,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
+  public void account(){
+    int[] clientIds = {4, 5, 6};
+    for (int i = 0; i < 10; i++) {
+      int clientId = clientIds[RND.plusInt(clientIds.length)];
+      double money = RND.plusDouble(100000, 2);
+
+      clientTestDao.get().insertClientAccount(RND.plusInt(1000), clientId, money,
+        RND.str(10), RND.dateDays(-10000, 0), true);
+    }
+  }
+
+  @Test
   public void getClientListPage() throws Exception {
     clientTestDao.get().clearAddress();
     clientTestDao.get().clearPhone();

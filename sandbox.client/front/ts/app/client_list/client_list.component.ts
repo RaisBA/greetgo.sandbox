@@ -239,8 +239,9 @@ export class ClientListComponent  implements OnInit{
             if (!this.clientEditWindowComponent.client.phones){
                 this.clientEditWindowComponent.client.phones = [];
             }
-
-            this.clientEditWindowComponent.client.phones.push(new PhoneInfo().assign(res.json()));
+            if (res != null){
+                this.clientEditWindowComponent.client.phones.push(new PhoneInfo().assign(res.json()));
+            }
             console.log(res.json());
         }, error => {
             console.log("ERROR ADD NEW PHONE" + error);
@@ -249,7 +250,7 @@ export class ClientListComponent  implements OnInit{
 
     saveClientEdit(event){
         this.clientEditWindowComponent.canEdit = false;
-        this.httpService.post("/client/save", {client:JSON.stringify(event)}).toPromise().then(res => {
+        this.httpService.post("/client/save", { client:JSON.stringify(event) }).toPromise().then(res => {
             this.clientEditWindowComponent.showWindow = false;
             this.clientEditWindowComponent.client = new ClientDetails();
             this.getClientList();
