@@ -86,7 +86,7 @@ import {SortType} from "../../model/SortInfo";
 export class ClientListComponent  implements OnInit{
     @Output() exit = new EventEmitter<void>();
 
-    pages: Array<any> = [1, 2, 3, '...'];
+    pages: Array<any> = [1];
     selectPage: number = 1;
     clients: Array<ClientInfo> | null = [];
     sortT: SortType = SortType.NON;
@@ -101,6 +101,7 @@ export class ClientListComponent  implements OnInit{
     }
 
     ngOnInit(): void {
+        this.changePage(1);
         this.getClientList();
     }
 
