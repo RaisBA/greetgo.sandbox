@@ -10,7 +10,7 @@ import {PhoneInfo} from "../../model/PhoneInfo";
     styles: [require('./client_edit_window.component.css')],
     template: require('./client_edit_window.component.html'),
 })
-export class ClientEditWindowComponent{
+export class ClientEditWindowComponent {
     showWindow: boolean = false;
     canEdit: boolean = false;
     isNew: boolean = true;
@@ -29,10 +29,11 @@ export class ClientEditWindowComponent{
         this.client = new ClientDetails();
     }
 
-    saveEdit(clientInfo, addresses, phoneList){
+    saveEdit(clientInfo, addresses, phoneList) {
         let result = new ClientDetails();
         result.id = this.client.id;
         result.birthDate = clientInfo["birthday"];
+        console.log(clientInfo["birthday"]);
         result.name = clientInfo["name"];
         result.surname = clientInfo["surname"];
         result.patronymic = clientInfo["patronymic"];
@@ -42,7 +43,7 @@ export class ClientEditWindowComponent{
 
         result.regAddress = new AddressInfo();
         result.regAddress.street = addresses["regStreet"];
-        result.regAddress.house  = addresses["regHouse"];
+        result.regAddress.house = addresses["regHouse"];
         result.regAddress.flat = addresses["regFlat"];
 
         result.factAddress = new AddressInfo();
@@ -52,7 +53,7 @@ export class ClientEditWindowComponent{
 
         result.phones = [];
 
-        for (let phoneId of Object.keys(phoneList)){
+        for (let phoneId of Object.keys(phoneList)) {
             let phone = new PhoneInfo();
             phone.id = phoneId;
             phone.num = phoneList[phoneId];
@@ -63,15 +64,15 @@ export class ClientEditWindowComponent{
         this.save.emit(result);
     }// end saveEdit
 
-    addNewPhone(num, type){
-        this.newPhone.emit({"clientID":this.client.id, "num":num, "type":type});
+    addNewPhone(num, type) {
+        this.newPhone.emit({"clientId": this.client.id, "num": num, "type": type});
         (<HTMLInputElement>document.getElementsByName("newPhoneNum")[0]).value = '';
     }
 
-    deletePhone(phone){
+    deletePhone(phone) {
         let q = window.confirm("Удалить телефон?");
-        if (q){
-            this.deletePhoneOut.emit({id:phone["id"], num:phone["num"], clientId:this.client.id});
+        if (q) {
+            this.deletePhoneOut.emit({id: phone["id"], num: phone["num"], clientId: this.client.id});
         }
     }
 }

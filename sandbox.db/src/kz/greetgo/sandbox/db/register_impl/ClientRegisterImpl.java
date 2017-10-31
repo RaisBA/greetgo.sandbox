@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.jdbc.ClientListCallback;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
+import org.fest.util.Strings;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -126,7 +127,7 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public void saveClient(ClientDetails clientDetails) {
+  public Boolean saveClient(ClientDetails clientDetails) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     Date date;
     try {
@@ -138,7 +139,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
     clientDao.get().updateClient(Integer.parseInt(clientDetails.id), clientDetails.name, clientDetails.surname,
       clientDetails.patronymic, clientDetails.gender,
-      date, (clientDetails.charm == null ? null : Integer.parseInt(clientDetails.charm)));
+      date, (Strings.isNullOrEmpty(clientDetails.charm) ? null : Integer.parseInt(clientDetails.charm)));
 
     saveAddress(clientDetails.id, clientDetails.factAddress, AddressTypes.FACTUAL);
     saveAddress(clientDetails.id, clientDetails.regAddress, AddressTypes.REGISTRATION);
@@ -148,6 +149,7 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().updatePhone(Integer.parseInt(phone.id), phone.num, phone.type);
     }
 
+    return true;
   }
 
   @Override
@@ -214,7 +216,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
     AddressInfo addressInfo = clientDao.get().loadAddress(Integer.parseInt(clientId), type.name());
 
-    if (addressInfo == null){
+    if (addressInfo == null) {
 
       clientDao.get().insertAddress(Integer.parseInt(clientId), type.name(), address.street, address.house, address.flat);
 

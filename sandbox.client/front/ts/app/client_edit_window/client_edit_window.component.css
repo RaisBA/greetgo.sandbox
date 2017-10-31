@@ -1,4 +1,4 @@
-.editWindow{
+.editWindow {
     position: fixed;
     z-index: 1;
     padding-top: 100px;
@@ -16,73 +16,74 @@
     width: 40%;
 }
 
-.form{
+.form {
     background-color: #ffffff;
     border: 2px solid #888;
 }
 
-.close{
+.close {
     padding: 8px;
     color: red;
 }
 
-.client{
+.client {
     padding: 20px;
     align-content: center;
 }
-.client-row{
+
+.client-row {
     padding-top: 16px;
 }
 
-.title{
+.title {
 
     font-size: large;
 }
 
-.client-info{
+.client-info {
     padding: 8px;
     min-width: 200px;
 }
 
-.addresses th, td{
+.addresses th, td {
     min-width: 300px;
     padding-top: 2px;
     border-right: 2px solid #dddddd;
     align-content: center;
 }
 
-.address-title{
+.address-title {
     padding-left: 10px;
 }
 
-.address-info{
+.address-info {
     padding: 8px;
     min-width: 250px;
     margin: 8px;
 }
 
-.addresses{
+.addresses {
     border: 4px solid #dddddd;
     background-color: whitesmoke;
 }
 
-.phones{
+.phones {
     padding-top: 20px;
     border: 4px solid #dddddd;
     background-color: whitesmoke;
 }
 
-.phones th, td{
+.phones th, td {
     min-width: 100px;
 }
 
-.phone-info{
+.phone-info {
     padding: 8px;
     min-width: 250px;
     margin: 8px;
 }
 
-.label-button, .label-button-new{
+.label-button, .label-button-new {
     color: grey;
     text-align: center;
     font-size: medium;
@@ -94,25 +95,28 @@
     -o-user-select: none;
     user-select: none;
 }
-.label-button-new{
+
+.label-button-new {
     background-color: #cccccc;
     color: #607e89;
 }
-.label-button:hover, .label-button-new:hover{
+
+.label-button:hover, .label-button-new:hover {
     color: black;
 }
-.phones td{
+
+.phones td {
     border-bottom: 2px solid #dddddd;
 }
 
-.phone-info-td{
+.phone-info-td {
     min-width: 300px;
     padding-top: 2px;
     border-right: 2px solid #dddddd;
     align-content: center;
 }
 
-.phone-new-td{
+.phone-new-td {
     background-color: #cccccc;
     min-width: 300px;
     padding-top: 2px;
@@ -120,7 +124,7 @@
     align-content: center;
 }
 
-.save-lb{
+.save-lb {
     color: grey;
     font-size: large;
     -webkit-touch-callout: none;
@@ -132,11 +136,11 @@
     user-select: none;
 }
 
-.save-lb:hover{
+.save-lb:hover {
     color: black;
 }
 
-.bottom{
+.bottom {
     padding-top: 20px;
     padding-left: 40%;
 }

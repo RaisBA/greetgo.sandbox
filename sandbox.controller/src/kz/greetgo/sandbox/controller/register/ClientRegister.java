@@ -23,7 +23,7 @@ public interface ClientRegister {
 
   void deleteClient(String id);
 
-  void saveClient(ClientDetails clientDetails);
+  Boolean saveClient(ClientDetails clientDetails);
 
   PageResultInfo chekPage(int page);
 }

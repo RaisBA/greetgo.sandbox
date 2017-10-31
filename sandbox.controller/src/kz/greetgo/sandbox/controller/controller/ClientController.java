@@ -65,8 +65,8 @@ public class ClientController implements Controller {
 
   @ToJson
   @Mapping("/save")
-  public void saveClient(@Par("client") @Json ClientDetails clientDetails){
-    clientRegister.get().saveClient(clientDetails);
+  public Boolean saveClient(@Par("client") @Json ClientDetails clientDetails){
+    return clientRegister.get().saveClient(clientDetails);
   }
 
   @ToJson

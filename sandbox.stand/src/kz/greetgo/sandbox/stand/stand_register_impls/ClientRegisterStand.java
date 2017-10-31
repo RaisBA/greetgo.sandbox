@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.stand.stand_register_impls;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
@@ -234,7 +235,7 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void saveClient(ClientDetails clientDetails) {
+  public Boolean saveClient(ClientDetails clientDetails) {
     this.clientDetails.put(clientDetails.id, clientDetails);
 
     ClientInfo cI;
@@ -248,6 +249,8 @@ public class ClientRegisterStand implements ClientRegister {
     cI.charm = charms.get(clientDetails.charm);
 
     this.clients.put(cI.id, cI);
+
+    return true;
   }
 
   @Override
