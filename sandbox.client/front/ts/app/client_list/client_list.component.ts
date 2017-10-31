@@ -83,7 +83,7 @@ import {SortType} from "../../model/SortInfo";
     <div>
     `,
 })
-export class ClientListComponent  implements OnInit{
+export class ClientListComponent implements OnInit {
     @Output() exit = new EventEmitter<void>();
 
     pages: Array<any> = [1];
@@ -106,12 +106,12 @@ export class ClientListComponent  implements OnInit{
     }
 
     changeSort(type: string) {
-        if (!this.sortFlag){
+        if (!this.sortFlag) {
             this.sortFlag = 1;
         }
         switch (type) {
             case "AGE":
-                if (this.sortT != SortType.AGE){
+                if (this.sortT != SortType.AGE) {
                     this.sortT = SortType.AGE;
                     this.sortFlag = 1;
                 } else {
@@ -120,7 +120,7 @@ export class ClientListComponent  implements OnInit{
                 this.getClientList();
                 break;
             case  "TOTAL_SCORE":
-                if (this.sortT != SortType.TOTAL_SCORE){
+                if (this.sortT != SortType.TOTAL_SCORE) {
                     this.sortT = SortType.TOTAL_SCORE;
                     this.sortFlag = 1;
                 } else {
@@ -129,7 +129,7 @@ export class ClientListComponent  implements OnInit{
                 this.getClientList();
                 break;
             case "MAX_SCORE":
-                if (this.sortT != SortType.MAX_SCORE){
+                if (this.sortT != SortType.MAX_SCORE) {
                     this.sortT = SortType.MAX_SCORE;
                     this.sortFlag = 1;
                 } else {
@@ -138,7 +138,7 @@ export class ClientListComponent  implements OnInit{
                 this.getClientList();
                 break;
             case "MIN_SCORE":
-                if (this.sortT != SortType.MIN_SCORE){
+                if (this.sortT != SortType.MIN_SCORE) {
                     this.sortT = SortType.MIN_SCORE;
                     this.sortFlag = 1;
                 } else {
@@ -149,7 +149,7 @@ export class ClientListComponent  implements OnInit{
         }
     }// end changeSort
 
-    editClient(id){
+    editClient(id) {
         this.clientEditWindowComponent.isNew = false;
         this.getClientDetails(id);
         this.getGenders();
@@ -159,21 +159,20 @@ export class ClientListComponent  implements OnInit{
         console.log("edit " + id);
     }
 
-    deleteClient(id){
+    deleteClient(id) {
         let q = window.confirm("Удалить клиента?");
-        if (q){
-            this.httpService.get("/client/delete", {clientId:id}).toPromise().then(res =>{
+        if (q) {
+            this.httpService.get("/client/delete", {clientId: id}).toPromise().then(res => {
                     window.alert("Клиент удален");
                     this.getClientList();
                 }, error => {
                     console.log(error);
                 }
-
             );
         }
     }
 
-    addNewClient(){
+    addNewClient() {
         this.clientEditWindowComponent.isNew = true;
         this.getClientDetails(null)
         this.getGenders();
@@ -183,10 +182,13 @@ export class ClientListComponent  implements OnInit{
         console.log("add new client");
     }
 
-    getClientList(){
-        console.log({'sort':this.sortT, 'direction':this.sortFlag, 'pageNum':this.selectPage});
-        this.httpService.get("/client/list", {'sort':this.sortT, 'direction':this.sortFlag, 'pageNum':this.selectPage}).
-        toPromise().then(res => {
+    getClientList() {
+        console.log({'sort': this.sortT, 'direction': this.sortFlag, 'pageNum': this.selectPage});
+        this.httpService.get("/client/list", {
+            'sort': this.sortT,
+            'direction': this.sortFlag,
+            'pageNum': this.selectPage
+        }).toPromise().then(res => {
                 this.clients = res.json();
             },
             error => {
@@ -195,8 +197,8 @@ export class ClientListComponent  implements OnInit{
         );
     }
 
-    getClientDetails(id){
-        this.httpService.get("/client/details", {clientId:id}).toPromise().then(res => {
+    getClientDetails(id) {
+        this.httpService.get("/client/details", {clientId: id}).toPromise().then(res => {
                 this.clientEditWindowComponent.client = new ClientDetails().assign(res.json() as ClientDetails);
             }, error => {
                 console.log("/client/details" + error);
@@ -205,42 +207,42 @@ export class ClientListComponent  implements OnInit{
     }
 
 
-
-    getGenders(){
+    getGenders() {
         this.httpService.get("/client/genders").toPromise().then(res => {
                 this.clientEditWindowComponent.genders = res.json();
             }, error => {
                 console.log("/client/genders" + error);
             }
-
         );
     }
-    getCharms(){
+
+    getCharms() {
         this.httpService.get("/client/charms").toPromise().then(res => {
                 this.clientEditWindowComponent.charms = res.json();
             }, error => {
                 console.log("/client/charms" + error);
             }
-
         );
     }
-    getPhoneTypes(){
+
+    getPhoneTypes() {
         this.httpService.get("/client/phoneTypes").toPromise().then(res => {
                 this.clientEditWindowComponent.phoneTypes = res.json();
             }, error => {
                 console.log("/client/phoneTypes" + error);
             }
-
         );
     }
 
-    addNewPhone(event){
-        this.httpService.get("/client/newPhone", event).toPromise().then(res =>{
-            if (!this.clientEditWindowComponent.client.phones){
+    addNewPhone(event) {
+        this.httpService.get("/client/newPhone", event).toPromise().then(res => {
+            if (!this.clientEditWindowComponent.client.phones) {
                 this.clientEditWindowComponent.client.phones = [];
             }
-            if (res != null){
+            if (res != null) {
                 this.clientEditWindowComponent.client.phones.push(new PhoneInfo().assign(res.json()));
+            } else {
+                window.alert("Такой телефон уже есть!");
             }
             console.log(res.json());
         }, error => {
@@ -248,9 +250,9 @@ export class ClientListComponent  implements OnInit{
         });
     }
 
-    saveClientEdit(event){
+    saveClientEdit(event) {
         this.clientEditWindowComponent.canEdit = false;
-        this.httpService.post("/client/save", { client:JSON.stringify(event) }).toPromise().then(res => {
+        this.httpService.post("/client/save", {client: JSON.stringify(event)}).toPromise().then(res => {
             this.clientEditWindowComponent.showWindow = false;
             this.clientEditWindowComponent.client = new ClientDetails();
             this.getClientList();
@@ -260,7 +262,7 @@ export class ClientListComponent  implements OnInit{
         this.clientEditWindowComponent.canEdit = true;
     }
 
-    deletePhone(event){
+    deletePhone(event) {
         this.clientEditWindowComponent.canEdit = false;
         this.httpService.post("/client/deletePhone", event).toPromise().then(res => {
             this.clientEditWindowComponent.client.phones = res.json();
@@ -270,11 +272,11 @@ export class ClientListComponent  implements OnInit{
         this.clientEditWindowComponent.canEdit = true;
     }
 
-    changePage(page){
-        if (page.toString() == '...'){
+    changePage(page) {
+        if (page.toString() == '...') {
             return;
         }
-        this.httpService.get("/client/pages", {'page':page}).toPromise().then(
+        this.httpService.get("/client/pages", {'page': page}).toPromise().then(
             res => {
                 console.log(res.json());
                 this.selectPage = res.json()["page"];
@@ -287,13 +289,13 @@ export class ClientListComponent  implements OnInit{
         );
     }
 
-    previousPage(){
-        if (this.selectPage > 1){
+    previousPage() {
+        if (this.selectPage > 1) {
             this.changePage(this.selectPage - 1);
         }
     }
 
-    nextPage(){
+    nextPage() {
         this.changePage(this.selectPage + 1);
     }
 }
